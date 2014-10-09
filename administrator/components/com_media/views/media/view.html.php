@@ -87,7 +87,7 @@ class MediaViewMedia extends JViewLegacy
 		$this->state = &$state;
 		$this->require_ftp = $ftp;
 		$this->folders_id = ' id="media-tree"';
-		$this->folders = $this->get('folderTree');
+		$this->folders = $this->get('FolderTree');
 
 		// Set the toolbar
 		$this->addToolbar();

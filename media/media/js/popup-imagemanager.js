@@ -62,9 +62,12 @@ var ImageManager = this.ImageManager = {
 			}
 		}
 
+		var context = this.getImageContext();
+
 		a = this._getUriObject($('#uploadForm').attr('action'));
 		q = this._getQueryObject(a.query);
 		q['folder'] = folder;
+		q['context'] = context;
 		var query = [];
 		for (var k in q) {
 			var v = q[k];
@@ -87,6 +90,15 @@ var ImageManager = this.ImageManager = {
 
 		return args['folder'];
 	},
+
+	getImageContext: function()
+	{
+		var url 	= this.frame.location.search.substring(1);
+		var args	= this.parseQuery(url);
+
+		return args['context'];
+	},
+
 
 	onok: function()
 	{
@@ -139,6 +151,7 @@ var ImageManager = this.ImageManager = {
 
 	setFolder: function(folder,asset,author)
 	{
+		var context = this.getContext();
 		for(var i = 0; i < this.folderlist.length; i++)
 		{
 			if (folder == this.folderlist.options[i].value) {
@@ -149,7 +162,7 @@ var ImageManager = this.ImageManager = {
 				break;
 			}
 		}
-		this.frame.location.href='index.php?option=com_media&view=imagesList&tmpl=component&folder=' + folder + '&asset=' + asset + '&author=' + author;
+		this.frame.location.href='index.php?option=com_media&view=imagesList&tmpl=component&context=' + context + '&folder=' + folder + '&asset=' + asset + '&author=' + author;
 	},
 
 	getFolder: function() {
@@ -222,8 +235,8 @@ var ImageManager = this.ImageManager = {
 			var key = unescape( KeyVal[0] );
 			var val = unescape( KeyVal[1] ).replace(/\+ /g, ' ');
 			params[key] = val;
-	   }
-	   return params;
+		}
+		return params;
 	},
 
 	refreshFrame: function()

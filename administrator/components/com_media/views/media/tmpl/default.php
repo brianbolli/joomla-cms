@@ -11,6 +11,10 @@ defined('_JEXEC') or die;
 
 $user  = JFactory::getUser();
 $input = JFactory::getApplication()->input;
+
+
+//var_dump($this->state->context);die;
+//var_dump($this->azure);die;
 ?>
 <div class="row-fluid">
 	<!-- Begin Sidebar -->
@@ -49,6 +53,7 @@ $input = JFactory::getApplication()->input;
 			<input type="hidden" name="task" value="" />
 			<input type="hidden" name="cb1" id="cb1" value="0" />
 			<input class="update-folder" type="hidden" name="folder" id="folder" value="<?php echo $this->state->folder; ?>" />
+			<input type="hidden" name="context" id="context" value="<?php echo $this->state->context; ?>" />
 		</form>
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>

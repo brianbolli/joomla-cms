@@ -31,6 +31,9 @@ class MediaModelList extends JModelLegacy
 			$folder = $input->get('folder', '', 'path');
 			$this->setState('folder', $folder);
 
+			$context = $input->get('context', 'joomla', 'string');
+			$this->setState('context', $context);
+
 			$parent = str_replace("\\", "/", dirname($folder));
 			$parent = ($parent == '.') ? null : $parent;
 			$this->setState('parent', $parent);
@@ -61,13 +64,48 @@ class MediaModelList extends JModelLegacy
 		return $list['docs'];
 	}
 
+	public function getList()
+	{
+		static $list;
+
+		// Only process the list once per request
+		//if (is_array($list))
+		//{
+			//return $list;
+		//}
+
+		// Get current path and context from request
+		$context = $this->getState('context');
+		$current = $this->getState('folder');
+
+		// If undefined, set to empty
+		if ($current == 'undefined')
+		{
+			$current = '';
+		}
+
+		if ($context == 'undefined')
+		{
+			$context = 'joomla';
+		}
+
+		$response = new stdClass();
+		$response->message = false;
+
+		$dispatcher = JDispatcher::getInstance();
+		JPluginHelper::importPlugin('media');
+		$dispatcher->trigger('onMediaGetList', array(&$list, $context, $current, &$response));
+
+		return $list;
+	}
+
 	/**
 	 * Build imagelist
 	 *
 	 * @param string $listFolder The image directory to display
 	 * @since 1.5
 	 */
-	public function getList()
+	public function getListOld()
 	{
 		static $list;
 

@@ -17,6 +17,7 @@ var MediaManager = this.MediaManager = {
 	{
 		this.folderframe	= $('#folderframe');
 		this.folderpath		= $('#folderpath');
+		this.mediacontext	= $('#context');
 
 		this.updatepaths	= $('input.update-folder');
 
@@ -40,6 +41,7 @@ var MediaManager = this.MediaManager = {
 		// Update the frame url
 		this.frameurl = this.frame.location.href;
 
+		var context = this.getContext();
 		var folder = this.getFolder();
 		if (folder) {
 			this.updatepaths.each(function(path, el){ el.value =folder; });
@@ -54,14 +56,15 @@ var MediaManager = this.MediaManager = {
 		a = this._getUriObject($('#uploadForm').attr('action'));
 		q = this._getQueryObject(a.query);
 		q['folder'] = folder;
+		q['context'] = context;
 		var query = [];
 
-        for (var k in q) {
-            var v = q[k];
-            if (q.hasOwnProperty(k) && v !== null) {
-                query.push(k+'='+v);
-            }
-        }
+				for (var k in q) {
+						var v = q[k];
+						if (q.hasOwnProperty(k) && v !== null) {
+								query.push(k+'='+v);
+						}
+				}
 
 		a.query = query.join('&');
 
@@ -86,7 +89,8 @@ var MediaManager = this.MediaManager = {
 		$('#' + viewstyle).removeClass('active');
 		viewstyle = type;
 		var folder = this.getFolder();
-		this._setFrameUrl('index.php?option=com_media&view=mediaList&tmpl=component&folder='+folder+'&layout='+type);
+		var context = this.getContext();
+		this._setFrameUrl('index.php?option=com_media&view=mediaList&tmpl=component&context='+context+'&folder='+folder+'&layout='+type);
 	},
 
 	refreshFrame: function()
@@ -106,6 +110,18 @@ var MediaManager = this.MediaManager = {
 		return args['folder'];
 	},
 
+	getContext: function()
+	{
+		var url = this.frame.location.search.substring(1);
+		var args = this.parseQuery(url);
+
+		if (typeof args['context'] === "undefined") {
+			args['context'] = 'joomla';
+		}
+
+		return args['context'];
+	},
+
 	parseQuery: function(query)
 	{
 		var params = new Object();
@@ -122,8 +138,8 @@ var MediaManager = this.MediaManager = {
 			var key = unescape( KeyVal[0] );
 			var val = unescape( KeyVal[1] ).replace(/\+ /g, ' ');
 			params[key] = val;
-	   }
-	   return params;
+		}
+		return params;
 	},
 
 	_setFrameUrl: function(url)
@@ -147,7 +163,7 @@ var MediaManager = this.MediaManager = {
 	_getUriObject: function(u){
 		var bitsAssociate = {}, bits = u.match(/^(?:([^:\/?#.]+):)?(?:\/\/)?(([^:\/?#]*)(?::(\d*))?)((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[\?#]|$)))*\/?)?([^?#\/]*))?(?:\?([^#]*))?(?:#(.*))?/);
 		['uri', 'scheme', 'authority', 'domain', 'port', 'path', 'directory', 'file', 'query', 'fragment'].forEach(function(key, index){
-		    bitsAssociate[key] = bits[index];
+				bitsAssociate[key] = bits[index];
 		});
 
 		return (bits)
