@@ -40,6 +40,31 @@ class PlgMediaAzure extends JPlugin
 		}
 	}
 
+	public function onMediaUploadFile($file, $context, &$response) {
+		if ($context === self::CONTEXT) {
+
+		}
+	}
+
+	public function onMediaDeleteFile($file, $context, &$response) {
+		if ($context === self::CONTEXT) {
+
+		}
+	}
+
+	public function onMediaCreateFolder($folder, $context, &$response) {
+
+		if ($context === self::CONTEXT) {
+			$this->azure->createContainer(strtolower($folder));
+		}
+	}
+
+	public function onMediaDeleteFolder($folder, $context, &$response) {
+		if ($context === self::CONTEXT) {
+
+		}
+	}
+
 	public function onMediaGetFolderList(&$options, $base, &$response) {
 			// Get some paths from the request
 			if (empty($base))
@@ -85,22 +110,37 @@ class PlgMediaAzure extends JPlugin
 
 
 	public function onMediaGetList(&$list, $context, $current, &$response) {
+
 		if ($context === self::CONTEXT)
 		{
 			if ($this->azure)
 			{
-
 				if (empty($current))
 				{
 					$iterateList = $this->azure->listContainers();
 					$list = $this->buildFolderListObjects($iterateList);
+					JFactory::getDocument()->addScriptDeclaration("
+						window.addEvent('domready', function()
+						{
+							var el = window.parent.document.getElementById('toolbar-new');
+							var button = el.firstElementChild || elem.firstChild;
+							button.disabled = 0;
+						});"
+					);
 				}
 				else
 				{
 					$iterateList = $this->azure->listBlobs($current);
 					$list = $this->buildFileListObjects($iterateList);
+					JFactory::getDocument()->addScriptDeclaration("
+						window.addEvent('domready', function()
+						{
+							var el = window.parent.document.getElementById('toolbar-new');
+							var button = el.firstElementChild || elem.firstChild;
+							button.disabled = 1;
+						});"
+					);
 				}
-
 			}
 		}
 		return true;
@@ -158,7 +198,7 @@ class PlgMediaAzure extends JPlugin
 							case 'bmp':
 							case 'jpeg':
 							case 'ico':
-									$info = @getimagesize($tmp->path_relative);
+									$info = @getimagesize($tmp->path_absolute);
 									$tmp->width		= @$info[0];
 									$tmp->height	= @$info[1];
 									$tmp->type		= @$info[2];

@@ -12,8 +12,6 @@ defined('_JEXEC') or die;
 $user  = JFactory::getUser();
 $input = JFactory::getApplication()->input;
 
-//var_dump($this->state->context);die;
-//var_dump($this->azure);die;
 ?>
 <div class="row-fluid">
 	<!-- Begin Sidebar -->
@@ -118,7 +116,6 @@ $input = JFactory::getApplication()->input;
 		});
 
 		$('a.show-contents').click(function(){
-			console.log('show contents click event');
 			$('#media-tree_tree').find('li').removeClass('active');
 			$(this).parent('li').addClass('active');
 		});
