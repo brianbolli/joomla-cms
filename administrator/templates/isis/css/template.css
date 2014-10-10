@@ -2869,6 +2869,11 @@ input[type="submit"].btn.btn-mini {
 	padding-right: 15px;
 	margin-bottom: 0;
 }
+
+.nav-list [class^="icon-"],
+.nav-list [class*=" icon-"] {
+	line-height: 24px;
+}
 .nav-list > li > a,
 .nav-list .nav-header {
 	margin-left: -15px;

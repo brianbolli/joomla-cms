@@ -31,6 +31,7 @@ class PlgMediaAzure extends JPlugin
 		parent::__construct($subject, $config);
 
 		if ($this->params->get('azure_enabled', 0)) {
+			JFactory::getLanguage()->load('plg_media_azure');
 			$endpoint = $this->params->get('azure_default_endpoint', null);
 			$name = $this->params->get('azure_account_name', null);
 			$key = $this->params->get('azure_account_key', null);
@@ -84,7 +85,6 @@ class PlgMediaAzure extends JPlugin
 
 
 	public function onMediaGetList(&$list, $context, $current, &$response) {
-
 		if ($context === self::CONTEXT)
 		{
 			if ($this->azure)
@@ -98,14 +98,30 @@ class PlgMediaAzure extends JPlugin
 				else
 				{
 					$iterateList = $this->azure->listBlobs($current);
-					//var_dump($iterateList);die;
 					$list = $this->buildFileListObjects($iterateList);
 				}
 
 			}
 		}
-
 		return true;
+	}
+
+	private function buildFolderListObjects($objects) {
+		$folders = array();
+
+		foreach ($objects as $item)
+		{
+				$tmp = new JObject();
+				$tmp->name = $item['name'];
+				$tmp->path = $item['url'];
+				$tmp->context = self::CONTEXT;
+				$tmp->path_relative = $item['name'];
+				$tmp->files = 0;
+				$tmp->folders = 0;
+				$folders[] = $tmp;
+		}
+
+		return array('folders' => $folders, 'docs' => array(), 'images' => array());
 	}
 
 	private function buildFileListObjects($objects) {
@@ -120,12 +136,15 @@ class PlgMediaAzure extends JPlugin
 					$tmp->title = $item['name'];
 					$tmp->path = $item['url'];
 					$tmp->context = self::CONTEXT;
-					$tmp->path_relative = $item['url'];
+					$tmp->path_relative = false;
+					$tmp->path_absolute = $item['url'];
 					$tmp->size = $item['size'];
-					if (strpos($tmp->path, '.') > -1) {
-						$ext = strtolower(JFile::getExt($item['url']));
+					$parts = explode('/', $item['content_type']);
+
+					if ($parts[0] == 'image') {
+						$ext = $parts[1];
 					} else {
-						$ext = 'jpg';
+						$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
 					}
 
 					switch ($ext)
@@ -139,7 +158,7 @@ class PlgMediaAzure extends JPlugin
 							case 'bmp':
 							case 'jpeg':
 							case 'ico':
-									$info = @getimagesize($tmp->path);
+									$info = @getimagesize($tmp->path_relative);
 									$tmp->width		= @$info[0];
 									$tmp->height	= @$info[1];
 									$tmp->type		= @$info[2];
@@ -185,9 +204,21 @@ class PlgMediaAzure extends JPlugin
 
 	}
 
-	public function onMediaGetFolderTree(&$tree, $base, &$response) {
-		JFactory::getLanguage()->load('plg_media_azure');
+	private function getApplicationContentTypeExtension($type, $name) {
+			switch ($type)
+			{
+					case 'x-zip' :
+						return 'zip';
+					break;
+					case 'plain' :
+						return 'js';
+					break;
+					default :
+						return 'doc';
+			}
+	}
 
+	public function onMediaGetFolderTree(&$tree, $base, &$response) {
 		if ($this->azure)
 		{
 			$baseUrl = $this->azure->getBaseUrl();
@@ -202,11 +233,11 @@ class PlgMediaAzure extends JPlugin
 				$relative	= str_replace($baseUrl, '', $container['url']);
 				$absolute	= $container['url'];
 				//$path		= explode('/', $relative);
-				$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'relative' => $relative, 'absolute' => $absolute);
+				$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'subfolders' => false, 'relative' => $relative, 'absolute' => $absolute);
 				$tmp['children'][$relative] = array('data' => $node, 'children' => array());
 			}
 
-			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'relative' => '', 'absolute' => $base);
+			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'subfolders' => true, 'relative' => '', 'absolute' => $base);
 			$tree['children'][self::CONTEXT] = $children;
 
 		}

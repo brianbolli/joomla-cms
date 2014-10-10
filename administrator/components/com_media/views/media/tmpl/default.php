@@ -12,7 +12,6 @@ defined('_JEXEC') or die;
 $user  = JFactory::getUser();
 $input = JFactory::getApplication()->input;
 
-
 //var_dump($this->state->context);die;
 //var_dump($this->azure);die;
 ?>
@@ -53,7 +52,7 @@ $input = JFactory::getApplication()->input;
 			<input type="hidden" name="task" value="" />
 			<input type="hidden" name="cb1" id="cb1" value="0" />
 			<input class="update-folder" type="hidden" name="folder" id="folder" value="<?php echo $this->state->folder; ?>" />
-			<input type="hidden" name="context" id="context" value="<?php echo $this->state->context; ?>" />
+			<input class="update-context" type="hidden" name="context" id="context" value="<?php echo $this->state->context; ?>" />
 		</form>
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
@@ -77,6 +76,7 @@ $input = JFactory::getApplication()->input;
 						<input type="text" id="folderpath" readonly="readonly" class="update-folder" />
 						<input type="text" id="foldername" name="foldername" />
 						<input class="update-folder" type="hidden" name="folderbase" id="folderbase" value="<?php echo $this->state->folder; ?>" />
+						<input class="update-context" type="hidden" name="contextbase" id="contextbase" value="<?php echo $this->state->context; ?>" />
 						<button type="submit" class="btn"><i class="icon-folder-open"></i> <?php echo JText::_('COM_MEDIA_CREATE_FOLDER'); ?></button>
 					</div>
 					<?php echo JHtml::_('form.token'); ?>
@@ -95,3 +95,43 @@ $input = JFactory::getApplication()->input;
 	</div>
 	<!-- End Content -->
 </div>
+<script>
+(function($){
+	var context, folder;
+
+	$(function(){
+
+		folder = document.getElementById('folder').value;
+		context = document.getElementById('context').value;
+
+		if (folder.length === 0) {
+			$('li#' + context).addClass('active');
+		}
+
+		$('#media-tree_tree').find('li').each(function(){
+			if ($(this).children('ul').length > 0) {
+				$(this).addClass('children');
+				$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
+			} else {
+				$(this).addClass('childless');
+			}
+		});
+
+		$('a.show-contents').click(function(){
+			console.log('show contents click event');
+			$('#media-tree_tree').find('li').removeClass('active');
+			$(this).parent('li').addClass('active');
+		});
+
+		$('li.children').on('shown', function(){
+			$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
+		});
+
+		$('li.children').on('hidden', function(){
+			$(this).children('i').removeClass('icon-folder-open').addClass('icon-folder-2')
+		});
+
+	});
+
+})(jQuery);
+</script>
