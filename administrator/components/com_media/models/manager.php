@@ -48,6 +48,7 @@ class MediaModelManager extends JModelLegacy
 	{
 		$response = new stdClass();
 		$response->message = false;
+		$response->type = false;
 
 		$options = array();
 
@@ -77,14 +78,19 @@ class MediaModelManager extends JModelLegacy
 	function getFolderTree($base = null) {
 		$response = new stdClass();
 		$response->message = false;
+		$response->type = false;
 
 		$tree = array();
+		$tree['children'] = array();
+		//$tree = new JFolderTree();
 
 		$dispatcher = JDispatcher::getInstance();
 		JPluginHelper::importPlugin('media');
-		$dispatcher->trigger('onMediaGetFolderTree', array(&$tree, $base, &$response));
+		$dispatcher->trigger('onMediaGetFolderTree', array(&$tree, &$response));
 
-		$tree['data'] = (object) array('name' => JText::_('COM_MEDIA_MEDIA'), 'context' => '', 'subfolders' => true, 'relative' => '', 'absolute' => $base);
+		$tree['data'] = (object) array('name' => JText::_('COM_MEDIA_MEDIA'), 'context' => '', 'subfolders' => true, 'relative' => '', 'absolute' => COM_MEDIA_BASE);
 		return $tree;
+		//$tree->setData(JText::_('COM_MEDIA_ROOT'), '', '', $base);
+		//return $tree->getTreeArray();
 	}
 }

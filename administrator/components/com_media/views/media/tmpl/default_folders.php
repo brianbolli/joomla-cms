@@ -20,7 +20,6 @@ $ulTarget = ($this->folders['data']->relative) ? str_replace('/', '-', $this->fo
 <ul class="nav nav-list collapse in" id="collapseFolder-<?php echo $ulTarget; ?>">
 <?php if (isset($this->folders['children'])) :
 	foreach ($this->folders['children'] as $folder) :
-
 	// Get a sanitised name for the target
 	$target = (empty($folder['data']->relative)) ? $folder['data']->context : $folder['data']->relative;
 	$target = str_replace('/', '-', $target); ?>

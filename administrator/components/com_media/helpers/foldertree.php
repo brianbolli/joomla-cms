@@ -1,39 +1,78 @@
 <?php
 /**
- * @package     Joomla.Libraries
- * @subpackage  Helper
+ * @package     Joomla.FolderTree
+ * @subpackage  FolderTree
  *
  * @copyright   Copyright (C) 2005 - 2014 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @license     GNU General Public License version 2 or later; see LICENSE
  */
 
 defined('JPATH_PLATFORM') or die;
 
 /**
- * Media helper class
+ * ToolBar handler
  *
- * @package     Joomla.Libraries
- * @subpackage  Helper
- * @since       3.2
+ * @package     Joomla.FolderTree
+ * @subpackage
+ * @since       1.5
  */
-
-class FolderTreeNode extends JObject
+class JFolderTree
 {
 
-}
+	protected $tree = array();
+	protected $data;
+	protected $name;
+	protected $context;
 
-class JHelperFolderTree
-{
-		protected $nodes = array();
+	public function __construct($name = false, $basePath, $context = 'joomla') {
+		$this->name = $name;
+		$this->context = $context;
+		$this->data = (object) array('name' => $name, 'context' => $this->context, 'relative' => '', 'absolute' => $basePath);
+		$this->tree = $this->fillArrayWithFileNodes(new DirectoryIterator( $basePath ));
+	}
 
-		public function add() {
-
+	public function addChildren($name, $child) {
+		if ($child instanceof JFolderTree)
+		{
+			$this->tree[$name]= $child->getTreeArray();
 		}
-		public function clear() {
-			$this->nodes = array();
+		else
+		{
+			throw new Exception(JText::_('COM_MEDIA_ERROR_FOLDER_TREE_OBJECT_EXCEPTION'));
 		}
+	}
 
-		public function getFolderTreeObject($fileName) {
-			JHelperMedia::getTypeIcon($fileName);
+
+
+	public function getTreeArray() {
+		if ($this->name)
+		{
+			return array(
+				$this->name => array(
+					'children' => $this->tree,
+					'data' => $this->data
+				)
+			);
 		}
+		else
+		{
+			return array(
+				'children' => $this->tree,
+				'data' => $this->data
+			);
+		}
+	}
+
+	private function fillArrayWithFileNodes(DirectoryIterator $dir) {
+		$data = array();
+		foreach ( $dir as $node )
+		{
+			if ( $node->isDir() && !$node->isDot() )
+			{
+				$data[$node->getFilename()]['children'] = $this->fillArrayWithFileNodes( new DirectoryIterator( $node->getPathname() ) );
+				$data[$node->getFilename()]['data'] = (object) array('name' => $node->getFilename(), 'context' => $this->context, 'relative' => $node->getFilename(), 'absolute' => $node->getPathname());
+			}
+		}
+		return $data;
+	}
 }

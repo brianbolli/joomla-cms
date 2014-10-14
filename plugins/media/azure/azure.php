@@ -41,28 +41,38 @@ class PlgMediaAzure extends JPlugin
 	}
 
 	public function onMediaUploadFile($file, $context, &$response) {
-		if ($context === self::CONTEXT) {
 
+		if ($context === self::CONTEXT) {
+			#TODO - figure this one out
+			$sream = file_stream_me($file);
+			$this->azure->createBlockBlob($context, $file, $stream);
 		}
+
 	}
 
 	public function onMediaDeleteFile($file, $context, &$response) {
-		if ($context === self::CONTEXT) {
 
+		if ($context === self::CONTEXT) {
+			$this->azure->deleteBlob(strtolower($folder));
 		}
+
 	}
 
-	public function onMediaCreateFolder($folder, $context, &$response) {
+	public function onMediaCreateFolder($context, $folder, $parent, &$response) {
 
 		if ($context === self::CONTEXT) {
-			$this->azure->createContainer(strtolower($folder));
+			$result = $this->azure->createContainer(strtolower($folder));
+			var_dump($result);
 		}
+
 	}
 
-	public function onMediaDeleteFolder($folder, $context, &$response) {
-		if ($context === self::CONTEXT) {
+	public function onMediaDeleteFolder($context, $folder, $path, &$response) {
 
+		if ($context === self::CONTEXT) {
+			$this->azure->deleteContainer(strtolower($folder));
 		}
+
 	}
 
 	public function onMediaGetFolderList(&$options, $base, &$response) {
@@ -142,6 +152,15 @@ class PlgMediaAzure extends JPlugin
 					);
 				}
 			}
+		} else {
+			JFactory::getDocument()->addScriptDeclaration("
+				window.addEvent('domready', function()
+				{
+					var el = window.parent.document.getElementById('toolbar-new');
+					var button = el.firstElementChild || elem.firstChild;
+					button.disabled = 0;
+				});"
+			);
 		}
 		return true;
 	}
@@ -258,7 +277,7 @@ class PlgMediaAzure extends JPlugin
 			}
 	}
 
-	public function onMediaGetFolderTree(&$tree, $base, &$response) {
+	public function onMediaGetFolderTree(&$tree, &$response) {
 		if ($this->azure)
 		{
 			$baseUrl = $this->azure->getBaseUrl();
@@ -273,12 +292,12 @@ class PlgMediaAzure extends JPlugin
 				$relative	= str_replace($baseUrl, '', $container['url']);
 				$absolute	= $container['url'];
 				//$path		= explode('/', $relative);
-				$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'subfolders' => false, 'relative' => $relative, 'absolute' => $absolute);
+				$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'relative' => $relative, 'absolute' => $absolute);
 				$tmp['children'][$relative] = array('data' => $node, 'children' => array());
 			}
 
-			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'subfolders' => true, 'relative' => '', 'absolute' => $base);
-			$tree['children'][self::CONTEXT] = $children;
+			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'relative' => '', 'absolute' => $baseUrl);
+			array_push($tree['children'], $children);
 
 		}
 

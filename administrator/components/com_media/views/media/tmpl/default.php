@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 
 $user  = JFactory::getUser();
 $input = JFactory::getApplication()->input;
-
+//var_dump($this->state);
 ?>
 <div class="row-fluid">
 	<!-- Begin Sidebar -->
@@ -85,7 +85,7 @@ $input = JFactory::getApplication()->input;
 		<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" method="post">
 			<div id="folderview">
 				<div class="view">
-					<iframe class="thumbnail" src="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;folder=<?php echo $this->state->folder;?>" id="folderframe" name="folderframe" width="100%" height="500px" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+					<iframe class="thumbnail" src="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder;?>" id="folderframe" name="folderframe" width="100%" height="500px" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
 				</div>
 				<?php echo JHtml::_('form.token'); ?>
 			</div>
@@ -95,15 +95,30 @@ $input = JFactory::getApplication()->input;
 </div>
 <script>
 (function($){
-	var context, folder;
+	//var context, folder;
 
 	$(function(){
 
-		folder = document.getElementById('folder').value;
-		context = document.getElementById('context').value;
+		function newFolderTreeActive() {
+			var f = document.getElementById('folder').value;
+			var c = document.getElementById('context').value;
+			console.log('folder: ' + f);
+			console.log(f.length);
+			console.log('context: ' + c);
+			console.log(c.length);
+			if (typeof f !== 'undefined' && typeof c !== 'undefined') {
+				$('#media-tree_tree').find('li').removeClass('active');
+				if (f.length === 0) {
+					$('li#' + c).addClass('active');
+				} else {
+					var activeId = f.replace('/','-');
+					$('li#' + activeId).addClass('active');
+				}
+			}
+		}
 
-		if (folder.length === 0) {
-			$('li#' + context).addClass('active');
+		document.getElementById('folderframe').onload = function() {
+			newFolderTreeActive();
 		}
 
 		$('#media-tree_tree').find('li').each(function(){
@@ -115,11 +130,6 @@ $input = JFactory::getApplication()->input;
 			}
 		});
 
-		$('a.show-contents').click(function(){
-			$('#media-tree_tree').find('li').removeClass('active');
-			$(this).parent('li').addClass('active');
-		});
-
 		$('li.children').on('shown', function(){
 			$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
 		});
@@ -129,6 +139,16 @@ $input = JFactory::getApplication()->input;
 		});
 
 	});
+
+	function newFolderTreeActive(folder, context) {
+		if (folder.value.length === 0) {
+			$('li#' + context.value).addClass('active');
+		} else {
+			var path = folder.value.explode('/');
+			var last = path.length - 1;
+			$('li#' + path[last]).addClass('active');
+		}
+	}
 
 })(jQuery);
 </script>

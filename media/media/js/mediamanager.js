@@ -20,6 +20,7 @@ var MediaManager = this.MediaManager = {
 		this.mediacontext	= $('#context');
 
 		this.updatepaths	= $('input.update-folder');
+		this.updatecontexts = $('input.update-context');
 
 		this.frame		= window.frames['folderframe'];
 		this.frameurl	= this.frame.location.href;
@@ -49,6 +50,11 @@ var MediaManager = this.MediaManager = {
 		} else {
 			this.updatepaths.each(function(path, el){ el.value = ''; });
 			this.folderpath.value = basepath;
+		}
+
+		console.log(context);
+		if (context) {
+			this.updatecontexts.each(function(path, el){ el.value = context})
 		}
 
 		$('#' + viewstyle).addClass('active');

@@ -35,11 +35,12 @@ class MediaControllerFolder extends JControllerLegacy
 		$user	= JFactory::getUser();
 
 		// Get some data from the request
-		$tmpl   = $this->input->get('tmpl');
-		$paths  = $this->input->get('rm', array(), 'array');
-		$folder = $this->input->get('folder', '', 'path');
+		$tmpl    = $this->input->get('tmpl');
+		$paths   = $this->input->get('rm', array(), 'array');
+		$context = $this->input->get('context', 'joomla', 'string');
+		$folder  = $this->input->get('folder', '', 'path');
 
-		$redirect = 'index.php?option=com_media&folder=' . $folder;
+		$redirect = 'index.php?option=com_media&context&=' . $context . '&folder=' . $folder;
 
 		if ($tmpl == 'component')
 		{
@@ -63,6 +64,24 @@ class MediaControllerFolder extends JControllerLegacy
 			return false;
 		}
 
+		$ret = true;
+
+		$response = new stdClass();
+		$response->message = false;
+		$response->type = false;
+
+		// Trigger the onMediaFileUpload event.
+		JPluginHelper::importPlugin('media');
+		$dispatcher	= JEventDispatcher::getInstance();
+		$result = $dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, $path, &$response));
+
+		$this->input->set('context', $context);
+		$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
+
+		if ($response->message) {
+			$this->setMessage($response->message, $response->type);
+		}
+
 
 		return $ret;
 	}
@@ -81,11 +100,12 @@ class MediaControllerFolder extends JControllerLegacy
 
 		$user  = JFactory::getUser();
 
+		$context     = $this->input->get('contextbase', '');
 		$folder      = $this->input->get('foldername', '');
 		$folderCheck = (string) $this->input->get('foldername', null, 'raw');
 		$parent      = $this->input->get('folderbase', '', 'path');
 
-		$this->setRedirect('index.php?option=com_media&folder=' . $parent . '&tmpl=' . $this->input->get('tmpl', 'index'));
+		$this->setRedirect('index.php?option=com_media&context=' . $context . '&folder=' . $parent . '&tmpl=' . $this->input->get('tmpl', 'index'));
 
 		if (strlen($folder) > 0)
 		{
@@ -97,15 +117,35 @@ class MediaControllerFolder extends JControllerLegacy
 				return false;
 			}
 
+			$response = new stdClass();
+			$response->message = false;
+			$response->type = false;
+
+			// Trigger the onMediaFileUpload event.
+			JPluginHelper::importPlugin('media');
+			$dispatcher	= JEventDispatcher::getInstance();
+			$result = $dispatcher->trigger('onMediaCreateFolder', array($context, $folder, $parent, &$response));
+
+			if ($result) {
+				$this->input->set('context', $context);
+				$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
+			} else {
+				$this->setMessage($response->message, $response->type);
+			}
 
 			$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
+			$this->input->set('context', $context);
 		}
 		else
 		{
 			// File name is of zero length (null).
-			JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME'));
+			$this->setMessage(JText::_('COM_MEDIA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME'), 'Warning');
 
 			return false;
+		}
+
+		if ($response->message) {
+			$this->setMessage($response->message, $response->type);
 		}
 
 		return true;

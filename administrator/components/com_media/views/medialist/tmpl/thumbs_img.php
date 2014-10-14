@@ -18,7 +18,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 ?>
 		<li class="imgOutline thumbnail height-80 width-80 center">
 			<?php if ($user->authorise('core.delete', 'com_media')):?>
-				<a class="close delete-item" target="_top" href="index.php?option=com_media&amp;task=file.delete&amp;tmpl=index&amp;<?php echo JSession::getFormToken(); ?>=1&amp;folder=<?php echo $this->state->folder; ?>&amp;rm[]=<?php echo $this->_tmp_img->name; ?>" rel="<?php echo $this->_tmp_img->name; ?>" title="<?php echo JText::_('JACTION_DELETE');?>">&#215;</a>
+				<a class="close delete-item" target="_top" href="index.php?option=com_media&amp;task=file.delete&amp;tmpl=index&amp;<?php echo JSession::getFormToken(); ?>=1&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder; ?>&amp;rm[]=<?php echo $this->_tmp_img->name; ?>" rel="<?php echo $this->_tmp_img->name; ?>" title="<?php echo JText::_('JACTION_DELETE');?>">&#215;</a>
 				<input class="pull-left" type="checkbox" name="rm[]" value="<?php echo $this->_tmp_img->name; ?>" />
 				<div class="clearfix"></div>
 			<?php endif;?>

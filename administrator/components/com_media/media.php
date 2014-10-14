@@ -27,8 +27,9 @@ if (!$user->authorise('core.manage', 'com_media')
 
 $params = JComponentHelper::getParams('com_media');
 
-// Load the helper class
+// Load the helper classes
 require_once JPATH_COMPONENT_ADMINISTRATOR . '/helpers/media.php';
+JLoader::register('JFolderTree', JPATH_COMPONENT_ADMINISTRATOR . '/helpers/foldertree.php');
 
 // Set the path definitions
 $popup_upload = $input->get('pop_up', null);
