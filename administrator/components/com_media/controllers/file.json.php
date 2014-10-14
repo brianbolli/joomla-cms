@@ -31,28 +31,22 @@ class MediaControllerFile extends JControllerLegacy
 	function upload()
 	{
 		$params = JComponentHelper::getParams('com_media');
-
+				//$this->setMessage('Something happened yo', 'Notice');
+				//return;
 		// Check for request forgeries
 		if (!JSession::checkToken('request'))
 		{
-			$response = array(
-				'status' => '0',
-				'error' => JText::_('JINVALID_TOKEN')
-			);
-			echo json_encode($response);
+			$this->setMessage(JText::_('JINVALID_TOKEN'), 'Warning');
 			return;
 		}
 
 		// Get the user
 		$user  = JFactory::getUser();
-		JLog::addLogger(array('text_file' => 'upload.error.php'), JLog::ALL, array('upload'));
 
 		// Get some data from the request
 		$file   = $this->input->files->get('Filedata', '', 'array');
+		$context = $this->input->get('context', 'joomla', 'string');
 		$folder = $this->input->get('folder', '', 'path');
-
-		// Instantiate the media helper
-		$mediaHelper = new JHelperMedia;
 
 		if (
 			$_SERVER['CONTENT_LENGTH'] > ($params->get('upload_maxsize', 0) * 1024 * 1024) ||
@@ -61,26 +55,29 @@ class MediaControllerFile extends JControllerLegacy
 			$_SERVER['CONTENT_LENGTH'] > $mediaHelper->toBytes(ini_get('memory_limit'))
 		)
 		{
-			$response = array(
-				'status' => '0',
-				'error' => JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE')
-			);
-			echo json_encode($response);
+			$this->setMessage(JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'), 'Warning');
 			return;
 		}
 
 		// Trigger the onContentBeforeSave event.
 		JPluginHelper::importPlugin('content');
-		$dispatcher	= JEventDispatcher::getInstance();
-		$object_file = new JObject($file);
-		$object_file->filepath = $filepath;
-		$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
-
-		// Trigger the onMediaFileUpload event.
 		JPluginHelper::importPlugin('media');
 		$dispatcher	= JEventDispatcher::getInstance();
+
 		$object_file = new JObject($file);
 		$object_file->filepath = $filepath;
-		$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
+		$dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
+
+		$response = new stdClass();
+		$response->message = false;
+		$response->type = false;
+
+		// Trigger the onMediaFileUpload event.
+		$dispatcher->trigger('onMediaUploadFile', array($context, $folder, $file, &$response));
+
+		if ($response->message)
+		{
+			$this->setMessage($response->message, $response->type);
+		}
 	}
 }

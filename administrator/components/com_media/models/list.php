@@ -69,10 +69,10 @@ class MediaModelList extends JModelLegacy
 		static $list;
 
 		// Only process the list once per request
-		//if (is_array($list))
-		//{
-			//return $list;
-		//}
+		if (is_array($list))
+		{
+			return $list;
+		}
 
 		// Get current path and context from request
 		$context = $this->getState('context');

@@ -23,12 +23,16 @@ class JFolderTree
 	protected $data;
 	protected $name;
 	protected $context;
+	protected $mediaBase;
 
 	public function __construct($name = false, $basePath, $context = 'joomla') {
 		$this->name = $name;
 		$this->context = $context;
-		$this->data = (object) array('name' => $name, 'context' => $this->context, 'relative' => '', 'absolute' => $basePath);
-		$this->tree = $this->fillArrayWithFileNodes(new DirectoryIterator( $basePath ));
+		$absolute = str_replace(DIRECTORY_SEPARATOR, '/', $basePath);
+		$this->mediaBase = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
+		$relative = str_replace($this->mediaBase, '', $absolute);
+		$this->data = (object) array('name' => $name, 'context' => $this->context, 'relative' => $relative, 'absolute' => $absolute);
+		$this->tree = $this->fillArrayWithFileNodes(new DirectoryIterator( $absolute ));
 	}
 
 	public function addChildren($name, $child) {
@@ -69,8 +73,10 @@ class JFolderTree
 		{
 			if ( $node->isDir() && !$node->isDot() )
 			{
+				$absolute = str_replace(DIRECTORY_SEPARATOR, '/', $node->getPathname());
+				$relative = str_replace($this->mediaBase . '/', '', $absolute);
 				$data[$node->getFilename()]['children'] = $this->fillArrayWithFileNodes( new DirectoryIterator( $node->getPathname() ) );
-				$data[$node->getFilename()]['data'] = (object) array('name' => $node->getFilename(), 'context' => $this->context, 'relative' => $node->getFilename(), 'absolute' => $node->getPathname());
+				$data[$node->getFilename()]['data'] = (object) array('name' => $node->getFilename(), 'context' => $this->context, 'relative' => $relative, 'absolute' => $absolute);
 			}
 		}
 		return $data;

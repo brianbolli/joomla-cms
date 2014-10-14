@@ -40,7 +40,7 @@ class PlgMediaAzure extends JPlugin
 		}
 	}
 
-	public function onMediaUploadFile($file, $context, &$response) {
+	public function onMediaUploadFile($context, &$object_file, &$response) {
 
 		if ($context === self::CONTEXT) {
 			#TODO - figure this one out
@@ -50,7 +50,7 @@ class PlgMediaAzure extends JPlugin
 
 	}
 
-	public function onMediaDeleteFile($file, $context, &$response) {
+	public function onMediaDeleteFile($context, &$paths, &$response) {
 
 		if ($context === self::CONTEXT) {
 			$this->azure->deleteBlob(strtolower($folder));

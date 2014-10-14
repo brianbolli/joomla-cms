@@ -45,6 +45,7 @@ class MediaControllerFile extends JControllerLegacy
 		$files        = $this->input->files->get('Filedata', '', 'array');
 		$return       = JFactory::getSession()->get('com_media.return_url');
 		$this->folder = $this->input->get('folder', '', 'path');
+		$context      = $this->input->get('context', '', 'string');
 
 		// Set the redirect
 		if ($return)
@@ -137,8 +138,13 @@ class MediaControllerFile extends JControllerLegacy
 				return false;
 			}
 
+			// Make the filename safe
+			$file['name'] = JFile::makeSafe($file['name']);
+			$file['filepath'] = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $this->folder, $file['name'])));
+
 			// Trigger the onContentBeforeSave event.
 			$object_file = new JObject($file);
+			//var_dump($object_file);die;
 			$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
 
 			if (in_array(false, $result, true))
@@ -149,15 +155,18 @@ class MediaControllerFile extends JControllerLegacy
 				return false;
 			}
 
-			// Trigger the onContentAfterSave event.
-			$dispatcher->trigger('onMediaFileUpload', array($context, &$object_file, &$response));
-			$this->setMessage(JText::sprintf('COM_MEDIA_UPLOAD_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+			$response = new stdClass();
+			$response->message = false;
+			$response->type = false;
 
-			if ($response)
+			// Trigger the onMediaUploadFile event.
+			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, &$response));
+
+			if ($response->message)
 			{
 				// Error in upload
 				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_UNABLE_TO_UPLOAD_FILE'));
-
+				$this->setMessage($response->message, $response->type);
 				return false;
 			}
 			else
@@ -205,11 +214,12 @@ class MediaControllerFile extends JControllerLegacy
 		JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
 
 		// Get some data from the request
-		$tmpl	= $this->input->get('tmpl');
-		$paths	= $this->input->get('rm', array(), 'array');
-		$folder = $this->input->get('folder', '', 'path');
+		$tmpl	 = $this->input->get('tmpl');
+		$paths	 = $this->input->get('rm', array(), 'array');
+		$folder  = $this->input->get('folder', '', 'path');
+		$context = $this->input->get('context', '', 'string');
 
-		$redirect = 'index.php?option=com_media&folder=' . $folder;
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
 
 		if ($tmpl == 'component')
 		{
@@ -231,8 +241,106 @@ class MediaControllerFile extends JControllerLegacy
 			return false;
 		}
 
+		JPluginHelper::importPlugin('content');
+		JPluginHelper::importPlugin('media');
+		$dispatcher	= JEventDispatcher::getInstance();
 
+		// Set FTP credentials, if given
+		JClientHelper::setCredentialsFromRequest('ftp');
 
+		$ret = true;
+
+		var_dump($paths);die;
+
+		foreach ($paths as $path)
+		{
+				if ($path !== JFile::makeSafe($path))
+				{
+						// Filename is not safe
+						$filename = htmlspecialchars($path, ENT_COMPAT, 'UTF-8');
+						JError::raiseWarning(100, JText::sprintf('PLG_MEDIA_JOOMLA_ERROR_UNABLE_TO_DELETE_FILE_WARNFILENAME', substr($filename, strlen(COM_MEDIA_BASE))));
+						continue;
+				}
+
+				$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $path)));
+				$object_file = new JObject(array('filepath' => $fullPath));
+
+				if (is_file($object_file->filepath))
+				{
+						// Trigger the onContentBeforeDelete event.
+						$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.file', &$object_file));
+
+						if (in_array(false, $result, true))
+						{
+								// There are some errors in the plugins
+								JError::raiseWarning(100, JText::plural('PLG_MEDIA_JOOMLA_ERROR_BEFORE_DELETE', count($errors = $object_file->getErrors()), implode('<br />', $errors)));
+								continue;
+						}
+
+						$response = new stdClass();
+						$response->message = false;
+						$response->type = false;
+
+						// Trigger the onMediaUploadFile event.
+						$dispatcher->trigger('onMediaDeleteFile', array($context, $path, &$response));
+
+						if ($response->message)
+						{
+							// Error in Delete
+							$this->setMessage($response->message, $response->type);
+							return false;
+						}
+
+						// Trigger the onContentAfterDelete event.
+						$dispatcher->trigger('onContentAfterDelete', array('com_media.file', &$object_file));
+						$this->setMessage(JText::sprintf('COM_MEDIA_DELETE_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+				}
+				elseif (is_dir($object_file->filepath))
+				{
+					#TODO Trigger Plugin Event to get contents
+					$contents = JFolder::files($object_file->filepath, '.', true, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));
+
+					if (empty($contents))
+					{
+						// Trigger the onContentBeforeDelete event.
+						$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.folder', &$object_file));
+
+						if (in_array(false, $result, true))
+						{
+								// There are some errors in the plugins
+								JError::raiseWarning(100, JText::plural('COM_MEDIA_ERROR_BEFORE_DELETE', count($errors = $object_file->getErrors()), implode('<br />', $errors)));
+								continue;
+						}
+
+						$ret &= JFolder::delete($object_file->filepath);
+
+						$response = new stdClass();
+						$response->message = false;
+						$response->type = false;
+
+						$dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, &$response));
+
+						if ($response->message)
+						{
+							// Error in Delete
+							$this->setMessage($response->message, $response->type);
+							return false;
+						}
+
+						// Trigger the onContentAfterDelete event.
+						$dispatcher->trigger('onContentAfterDelete', array('com_media.folder', &$object_file));
+						$this->setMessage(JText::sprintf('COM_MEDIA_DELETE_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+					}
+					else
+					{
+						// This makes no sense...
+						JError::raiseWarning(100, JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+					}
+				}
+
+		}
 		return $ret;
 	}
+
+
 }
