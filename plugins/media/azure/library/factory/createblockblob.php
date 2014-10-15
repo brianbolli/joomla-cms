@@ -61,11 +61,15 @@ class CreateBlockBlob extends JAzureQuery
 	 *
 	 * @return void
 	 */
-	public function __construct($container, $blob, $content, $options) {
+	public function __construct($container, $blob, $content, $options, &$response = false) {
 		$this->container = $container;
 		$this->blob = $blob;
 		$this->content = $content;
 		$this->options = $this->processOptions($options);
+
+		if ($response) {
+			$this->response = $response;
+		}
 	}
 
 	/**

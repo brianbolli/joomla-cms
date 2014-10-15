@@ -40,14 +40,27 @@ class PlgMediaAzure extends JPlugin
 		}
 	}
 
-	public function onMediaUploadFile($context, &$object_file, &$response) {
+	public function onMediaUploadFile($context, &$object_file, $folder, &$response) {
 
 		if ($context === self::CONTEXT) {
-			#TODO - figure this one out
-			$sream = file_stream_me($file);
-			$this->azure->createBlockBlob($context, $file, $stream);
+
+			$content = fopen($object_file->tmp_name, 'r');
+
+			$data = array(
+				"content_type" => $object_file->type,
+				"content_language" => "",
+				"content_encoding" => "",
+				"content_mD5" => "",
+				"cache_control" => "",
+				"sequence_number" => ""
+			);
+
+			if ($this->azure->createBlockBlob($folder, $object_file->name, $content, $data, $response)) {
+				return false;
+			}
 		}
 
+		return true;
 	}
 
 	public function onMediaDeleteFile($context, &$paths, &$response) {
@@ -70,7 +83,7 @@ class PlgMediaAzure extends JPlugin
 	public function onMediaDeleteFolder($context, $folder, $path, &$response) {
 
 		if ($context === self::CONTEXT) {
-			$this->azure->deleteContainer(strtolower($folder));
+			$this->azure->deleteContainer(strtolower($path));
 		}
 
 	}

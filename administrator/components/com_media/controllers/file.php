@@ -50,7 +50,7 @@ class MediaControllerFile extends JControllerLegacy
 		// Set the redirect
 		if ($return)
 		{
-			$this->setRedirect($return . '&folder=' . $this->folder);
+			$this->setRedirect($return . '&context=' . $context . '&folder=' . $this->folder);
 		}
 		else
 		{
@@ -160,7 +160,7 @@ class MediaControllerFile extends JControllerLegacy
 			$response->type = false;
 
 			// Trigger the onMediaUploadFile event.
-			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, &$response));
+			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, $this->folder, &$response));
 
 			if ($response->message)
 			{

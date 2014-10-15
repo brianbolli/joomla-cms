@@ -64,8 +64,6 @@ class MediaControllerFolder extends JControllerLegacy
 			return false;
 		}
 
-		$ret = true;
-
 		$response = new stdClass();
 		$response->message = false;
 		$response->type = false;
@@ -73,17 +71,21 @@ class MediaControllerFolder extends JControllerLegacy
 		// Trigger the onMediaFileUpload event.
 		JPluginHelper::importPlugin('media');
 		$dispatcher	= JEventDispatcher::getInstance();
-		$result = $dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, $path, &$response));
+
+		foreach ($paths as $path)
+		{
+			$dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, $path, &$response));
+			if ($response) {
+				$this->setMessage($response->message, $response->type);
+				$response->message = false;
+				$response->type = false;
+			}
+		}
 
 		$this->input->set('context', $context);
 		$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
 
-		if ($response->message) {
-			$this->setMessage($response->message, $response->type);
-		}
-
-
-		return $ret;
+		return true;
 	}
 
 	/**

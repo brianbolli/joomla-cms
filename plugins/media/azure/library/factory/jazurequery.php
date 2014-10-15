@@ -29,6 +29,8 @@ abstract class JAzureQuery implements IQuery
 	 */
 	protected $options;
 
+	protected $response;
+
 	/**
 	 *
 	 * @param unknown $options
@@ -64,8 +66,6 @@ abstract class JAzureQuery implements IQuery
 
 		$proxy = ServicesBuilder::getInstance()->createBlobService($connection);
 
-		//var_dump($this->options);die;
-
 		if ($this->containerExists($containers) || is_null($this->container)) {
 			try {
 				if (is_null($this->options)) {
@@ -78,16 +78,16 @@ abstract class JAzureQuery implements IQuery
 					$result = call_user_func(array($proxy, $this->name), $this->options);
 				}
 			} catch(HTTP_Request2_ConnectionException $http2_e) {
-				$this->throwExceptionErrorInJoomla($http2_e);
+				return $this->throwExceptionErrorInJoomla($http2_e);
 			} catch(ServiceException $se) {
-				$this->throwServiceExceptionErrorInJoomla($se);
+				return $this->throwServiceExceptionErrorInJoomla($se);
 			} catch (Exception $e) {
-				$this->throwExceptionErrorInJoomla($e);
+				return $this->throwExceptionErrorInJoomla($e);
 			}
 
 		} else {
 			$message = $this->containerTestErrorMessage($this->container);
-			$this->throwJoomlaError($message);
+			return $this->throwJoomlaError($message);
 		}
 
 		return $this->processResults($result);
@@ -123,7 +123,7 @@ abstract class JAzureQuery implements IQuery
 	 */
 	protected function throwServiceExceptionErrorInJoomla(ServiceException $se) {
 		$error_message = "Service Exception Error Code [" . $se->getCode() . "] : " . $se->getMessage();
-		$this->throwJoomlaError($error_message);
+		return $this->throwJoomlaError($error_message);
 	}
 
 	/**
@@ -134,7 +134,7 @@ abstract class JAzureQuery implements IQuery
 	 */
 	protected function throwExceptionErrorInJoomla(Exception $e) {
 		$error_message = "Exception Error Code [" . $e->getCode() . "] : " . $e->getMessage();
-		$this->throwJoomlaError($error_message);
+		return $this->throwJoomlaError($error_message);
 	}
 
 	/**
@@ -146,9 +146,10 @@ abstract class JAzureQuery implements IQuery
 	 *
 	 * @return boolean
 	 */
-	protected function throwJoomlaError($msg, $type = 'error') {
+	protected function throwJoomlaError($msg, $type = 'Warning') {
 		if (defined('LOFT_J_AZURE_CONFIGURE') && (int) LOFT_J_AZURE_CONFIGURE !== 1) {
-			JFactory::getApplication()->enqueueMessage(JText::_($msg), $type);
+			$this->response->message = $msg;
+			$this->response->type = $type;
 		}
 		return false;
 	}

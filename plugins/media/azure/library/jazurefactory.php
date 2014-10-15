@@ -194,8 +194,8 @@ class JAzureFactory
 	 *
 	 * @see CreateBlockBlob()
 	 */
-	public function createBlockBlob($container, $blob, $content, $options = null) {
-		return $this->query('CreateBlockBlob', array($container, $blob, $content, $options));
+	public function createBlockBlob($container, $blob, $content, $options = null, &$response) {
+		return $this->query('CreateBlockBlob', array($container, $blob, $content, $options, &$response));
 	}
 
 	/**

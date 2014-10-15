@@ -23,7 +23,7 @@ class PlgMediaJoomla extends JPlugin
 {
 	const CONTEXT = 'joomla';
 
-	public function onMediaUploadFile($context, &$object_file, &$response) {
+	public function onMediaUploadFile($context, &$object_file, $folder, &$response) {
 
 		$user = JFactory::getUser();
 
@@ -156,7 +156,9 @@ class PlgMediaJoomla extends JPlugin
 	public function onMediaDeleteFolder($context, $folder, $path, &$response) {
 		if ($context === self::CONTEXT)
 		{
-			$ret &= !JFolder::delete($object_file->filepath);
+			if (!JFolder::delete($path)) {
+
+			}
 		}
 
 		return true;
