@@ -149,9 +149,8 @@ var ImageManager = this.ImageManager = {
 		return false;
 	},
 
-	setFolder: function(folder,asset,author)
+	setFolder: function(folder,context,asset,author)
 	{
-		var context = this.getContext();
 		for(var i = 0; i < this.folderlist.length; i++)
 		{
 			if (folder == this.folderlist.options[i].value) {
@@ -196,7 +195,7 @@ var ImageManager = this.ImageManager = {
 			{
 				this.folderlist.selectedIndex = i;
 				var newFolder = this.folderlist.options[i].value;
-				this.setFolder(newFolder);
+				this.setFolder(currentFolder);
 				break;
 			}
 		}

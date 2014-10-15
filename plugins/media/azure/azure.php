@@ -88,51 +88,65 @@ class PlgMediaAzure extends JPlugin
 
 	}
 
-	public function onMediaGetFolderList(&$options, $base, &$response) {
-			// Get some paths from the request
-			if (empty($base))
-			{
-					$base = COM_MEDIA_BASE;
-			}
-			//corrections for windows paths
-			$base = str_replace(DIRECTORY_SEPARATOR, '/', $base);
-			$com_media_base_uni = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
+	public function onMediaGetFolderList(&$groups, $base, &$response) {
 
-			// Get the list of folders
-			jimport('joomla.filesystem.folder');
-			$folders = JFolder::folders($base, '.', true, true);
+		$tmp = array();
+		// Get some paths from the request
+		if (empty($base))
+		{
+				$base = COM_MEDIA_BASE;
+		}
+		//corrections for windows paths
+		$base = str_replace(DIRECTORY_SEPARATOR, '/', $base);
+		$com_media_base_uni = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
 
-			$document = JFactory::getDocument();
-			$document->setTitle(JText::_('COM_MEDIA_INSERT_IMAGE'));
-			$response = new stdClass();
-			$response->message = false;
-			if ($this->params->get('azure_enabled', 0)) {
-				$data = new stdClass();
-				$data->name = 'Azure';
-				$data->relative = '';
-				$data->absolute = '';
-				$options[] = JHtml::_('select.option', "Azure", "/");
-				$containers = $this->azure->listContainers();
-				$account_name = $this->params->get('azure_default_name');
+		// Get the list of folders
+		jimport('joomla.filesystem.folder');
+		$folders = JFolder::folders($base, '.', true, true);
 
-				foreach ($containers as $container) {
-					$value = $account_name . '.' . $container['name'];
-						$options[] = JHtml::_('select.option', $value, $container['name']);
-				}
+		$document = JFactory::getDocument();
+		$document->setTitle(JText::_('COM_MEDIA_INSERT_IMAGE'));
+		$response = new stdClass();
+		$response->message = false;
+		if ($this->params->get('azure_enabled', 0)) {
+			$data = new stdClass();
+			$data->name = 'Azure';
+			$data->relative = '';
+			$data->absolute = '';
+			$tmp[] = JHtml::_('select.option', "Azure", "/", 'value', 'text', false);
+			$containers = $this->azure->listContainers();
+			$account_name = $this->params->get('azure_default_name');
 
-				// Sort the folder list array
-				//if (is_array($options))
-				//{
-						//sort($options);
-				//}
+			foreach ($containers as $container) {
+				$value = $container['name'];
+				$tmp[] = JHtml::_('select.option', $value, $container['name'], 'value', 'text', false);
 			}
 
-			return true;
+			// Sort the folder list array
+			//if (is_array($options))
+			//{
+					//sort($options);
+			//}
+		}
+
+
+		$groups[self::CONTEXT] = array(
+			'id' => self::CONTEXT,
+			'label' => JText::_('PLG_MEDIA_AZURE'),
+			'items' => $tmp
+		);
+
+		return true;
 
 	}
 
 
 	public function onMediaGetList(&$list, $context, $current, &$response) {
+			if (JFactory::getApplication()->input->get('view') == 'imagesList') {
+					$mediaList = false;
+			} else {
+					$mediaList = true;
+			}
 
 		if ($context === self::CONTEXT)
 		{
@@ -142,38 +156,47 @@ class PlgMediaAzure extends JPlugin
 				{
 					$iterateList = $this->azure->listContainers();
 					$list = $this->buildFolderListObjects($iterateList);
-					JFactory::getDocument()->addScriptDeclaration("
-						window.addEvent('domready', function()
-						{
-							var el = window.parent.document.getElementById('toolbar-new');
-							var button = el.firstElementChild || elem.firstChild;
-							button.disabled = 0;
-						});"
-					);
+					if ($mediaList)
+					{
+						JFactory::getDocument()->addScriptDeclaration("
+							window.addEvent('domready', function()
+							{
+								var el = window.parent.document.getElementById('toolbar-new');
+								var button = el.firstElementChild || elem.firstChild;
+								button.disabled = 0;
+							});"
+						);
+					}
 				}
 				else
 				{
 					$iterateList = $this->azure->listBlobs($current);
 					$list = $this->buildFileListObjects($iterateList);
-					JFactory::getDocument()->addScriptDeclaration("
-						window.addEvent('domready', function()
-						{
-							var el = window.parent.document.getElementById('toolbar-new');
-							var button = el.firstElementChild || elem.firstChild;
-							button.disabled = 1;
-						});"
-					);
+					if ($mediaList)
+					{
+						JFactory::getDocument()->addScriptDeclaration("
+							window.addEvent('domready', function()
+							{
+								var el = window.parent.document.getElementById('toolbar-new');
+								var button = el.firstElementChild || elem.firstChild;
+								button.disabled = 1;
+							});"
+						);
+					}
 				}
 			}
 		} else {
-			JFactory::getDocument()->addScriptDeclaration("
-				window.addEvent('domready', function()
-				{
-					var el = window.parent.document.getElementById('toolbar-new');
-					var button = el.firstElementChild || elem.firstChild;
-					button.disabled = 0;
-				});"
-			);
+			if ($mediaList)
+			{
+				JFactory::getDocument()->addScriptDeclaration("
+					window.addEvent('domready', function()
+					{
+						var el = window.parent.document.getElementById('toolbar-new');
+						var button = el.firstElementChild || elem.firstChild;
+						button.disabled = 0;
+					});"
+				);
+			}
 		}
 		return true;
 	}

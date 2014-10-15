@@ -275,6 +275,7 @@ class PlgMediaJoomla extends JPlugin
 					{
 							$tmp = new JObject;
 							$tmp->name = basename($folder);
+							$tmp->context = self::CONTEXT;
 							$tmp->path = str_replace(DIRECTORY_SEPARATOR, '/', JPath::clean($basePath . '/' . $folder));
 							$tmp->path_relative = str_replace($mediaBase, '', $tmp->path);
 							$count = MediaHelper::countFiles($tmp->path);
@@ -292,45 +293,52 @@ class PlgMediaJoomla extends JPlugin
 		return true;
 	}
 
-	public function onMediaGetFolderList(&$options, $base, &$response) {
-			// Get some paths from the request
-			if (empty($base))
-			{
-					$base = COM_MEDIA_BASE;
-			}
-			//corrections for windows paths
-			$base = str_replace(DIRECTORY_SEPARATOR, '/', $base);
-			$com_media_base_uni = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
+	public function onMediaGetFolderList(&$groups, $base, &$response) {
+		JFactory::getLanguage()->load('plg_media_joomla');
 
-			// Get the list of folders
-			jimport('joomla.filesystem.folder');
-			$folders = JFolder::folders($base, '.', true, true);
+		$tmp = array();
 
-			$document = JFactory::getDocument();
-			$document->setTitle(JText::_('PLG_MEDIA_JOOMLA_INSERT_IMAGE'));
+		// Get some paths from the request
+		if (empty($base))
+		{
+				$base = COM_MEDIA_BASE;
+		}
+		//corrections for windows paths
+		$base = str_replace(DIRECTORY_SEPARATOR, '/', $base);
+		$com_media_base_uni = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
 
-				// Build the array of select options for the folder list
-			//$options[] = JHtml::_('select.option', urldecode($base), 'Joomla Media');
-			$options[] = JHtml::_('select.option', "", "/");
+		// Get the list of folders
+		jimport('joomla.filesystem.folder');
+		$folders = JFolder::folders($base, '.', true, true);
 
-				foreach ($folders as $folder)
-				{
-						$folder		= str_replace($com_media_base_uni, "", str_replace(DIRECTORY_SEPARATOR, '/', $folder));
-						$value		= substr($folder, 1);
-						$text		= str_replace(DIRECTORY_SEPARATOR, "/", $folder);
-						$options[]	= JHtml::_('select.option', $value, $text);
-				}
+		$document = JFactory::getDocument();
+		$document->setTitle(JText::_('PLG_MEDIA_JOOMLA_INSERT_IMAGE'));
 
-			// Sort the folder list array
-			if (is_array($options))
-			{
-					sort($options);
-			}
+			// Build the array of select options for the folder list
+		//$options[] = JHtml::_('select.option', urldecode($base), 'Joomla Media');
+		$tmp[] = JHtml::_('select.option', "", "/", 'value', 'text', false, ' name="' . self::CONTEXT . '"');
 
-			return $options;
-			// Create the drop-down folder select list
-			//$list = JHtml::_('select.genericlist', $options, 'folderlist', 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, '.$asset.', '.$author.')" ', 'value', 'text', $base);
+		foreach ($folders as $folder)
+		{
+			$folder		= str_replace($com_media_base_uni, "", str_replace(DIRECTORY_SEPARATOR, '/', $folder));
+			$value		= substr($folder, 1);
+			$text		= str_replace(DIRECTORY_SEPARATOR, "/", $folder);
+			$tmp[]	= JHtml::_('select.option', $value, $text, 'value', 'text', false);
+		}
 
+		// Sort the folder list array
+		//if (is_array($options))
+		//{
+				//sort($options);
+		//}
+
+		$groups[self::CONTEXT] = array(
+			'id' => self::CONTEXT,
+			'label' => JText::_('PLG_MEDIA_JOOMLA'),
+			'items' => $tmp
+		);
+
+		return true;
 	}
 
 	public function onMediaGetFolderTree(&$tree, &$response) {

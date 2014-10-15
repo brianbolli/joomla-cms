@@ -50,11 +50,13 @@ class MediaModelManager extends JModelLegacy
 		$response->message = false;
 		$response->type = false;
 
-		$options = array();
+		$groups = array();
 
 		$dispatcher = JDispatcher::getInstance();
 		JPluginHelper::importPlugin('media');
-		$dispatcher->trigger('onMediaGetFolderlist', array(&$options, $base, &$response));
+		$dispatcher->trigger('onMediaGetFolderlist', array(&$groups, $base, &$response));
+
+		//var_dump($groups);die;
 
 		// Get asset and author id (use integer filter)
 		$input = JFactory::getApplication()->input;
@@ -69,9 +71,22 @@ class MediaModelManager extends JModelLegacy
 
 		$author = $input->get('author', 0, 'integer');
 
-		// Create the drop-down folder select list
-		$list = JHtml::_('select.genericlist', $options, 'folderlist', 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, '.$asset.', '.$author.')" ', 'value', 'text', $base);
+		$value = 'joomla./banners/';
 
+		// Create the drop-down folder select list
+		//$list = JHtml::_('select.genericlist', $groups, 'folderlist', 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, '.$asset.', '.$author.')" ', 'value', 'text', $base);
+		$list = JHtml::_('select.groupedlist', $groups, 'folderlist',
+			array(
+				'list.attr' => 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, this.options[this.selectedIndex].parentNode.getAttribute(\'data-element\'), '.$asset.', '.$author.')" ',
+				'id' => 'folderlist',
+				'list.select' => $value,
+				'group.id' => 'id',
+				'group.label' => 'label',
+				'group.items' => 'items',
+				'option.key.toHtml' => false,
+				'option.text.toHtml' => false
+			)
+		);
 		return $list;
 	}
 
