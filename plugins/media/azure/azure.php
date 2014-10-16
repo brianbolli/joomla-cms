@@ -113,7 +113,7 @@ class PlgMediaAzure extends JPlugin
 			$data->name = 'Azure';
 			$data->relative = '';
 			$data->absolute = '';
-			$tmp[] = JHtml::_('select.option', "Azure", "/", 'value', 'text', false);
+			$tmp[] = JHtml::_('select.option', "", "/", 'value', 'text', false);
 			$containers = $this->azure->listContainers();
 			$account_name = $this->params->get('azure_default_name');
 

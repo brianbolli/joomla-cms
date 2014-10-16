@@ -30,6 +30,13 @@ var ImageManager = this.ImageManager = {
 
 		// Setup image listing objects
 		this.folderlist = document.getElementById('folderlist');
+		$(this.folderlist).on('change', function(e){
+			var folder = this.options[e.target.selectedIndex].value;
+			var context = this.options[e.target.selectedIndex].parentNode.getAttribute('id');
+			var author = jQuery(this).attr('data-author');
+			var asset = jQuery(this).attr('data-asset');
+			ImageManager.setFolder(folder, context, asset, author);
+		});
 
 		this.frame		= window.frames['imageframe'];
 		this.frameurl	= this.frame.location.href;
@@ -43,6 +50,7 @@ var ImageManager = this.ImageManager = {
 		this.upbutton = document.getElementById('upbutton');
 		$(this.upbutton).off('click');
 		$(this.upbutton).on('click', function(){ ImageManager.upFolder(); });
+		$(this.upbutton).prop('disabled', 1);
 	},
 
 	onloadimageview: function()
@@ -81,6 +89,8 @@ var ImageManager = this.ImageManager = {
 			portString = ':'+a.port;
 		}
 		$('#uploadForm').attr('action', a.scheme+'://'+a.domain+portString+a.path+'?'+a.query);
+
+		this.validateUpButton(folder);
 	},
 
 	getImageFolder: function()
@@ -149,6 +159,15 @@ var ImageManager = this.ImageManager = {
 		return false;
 	},
 
+	validateUpButton: function(folder) {
+
+		if (folder.length === 0) {
+			$(this.upbutton).prop('disabled', 1);
+		} else {
+			$(this.upbutton).prop('disabled', 0);
+		}
+	},
+
 	setFolder: function(folder,context,asset,author)
 	{
 		for(var i = 0; i < this.folderlist.length; i++)
@@ -162,6 +181,9 @@ var ImageManager = this.ImageManager = {
 			}
 		}
 		this.frame.location.href='index.php?option=com_media&view=imagesList&tmpl=component&context=' + context + '&folder=' + folder + '&asset=' + asset + '&author=' + author;
+
+		this.validateUpButton(folder);
+
 	},
 
 	getFolder: function() {
@@ -203,7 +225,7 @@ var ImageManager = this.ImageManager = {
 
 	populateFields: function(file)
 	{
-		$("#f_url").val(image_base_path+file);
+		$("#f_url").val(file);
 	},
 
 	showMessage: function(text)
@@ -276,11 +298,4 @@ var ImageManager = this.ImageManager = {
 
 jQuery(function(){
 	ImageManager.initialize();
-	jQuery(document).on('change', '#folderlist', function(e){
-		var folder = this.options[e.target.selectedIndex].value;
-		var context = this.options[e.target.selectedIndex].parentNode.getAttribute('id');
-		var author = jQuery(this).attr('data-author');
-		var asset = jQuery(this).attr('data-asset');
-		ImageManager.setFolder(folder, context, asset, author);
-	});
 });
