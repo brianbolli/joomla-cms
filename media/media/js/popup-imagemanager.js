@@ -276,4 +276,11 @@ var ImageManager = this.ImageManager = {
 
 jQuery(function(){
 	ImageManager.initialize();
+	jQuery(document).on('change', '#folderlist', function(e){
+		var folder = this.options[e.target.selectedIndex].value;
+		var context = this.options[e.target.selectedIndex].parentNode.getAttribute('id');
+		var author = jQuery(this).attr('data-author');
+		var asset = jQuery(this).attr('data-asset');
+		ImageManager.setFolder(folder, context, asset, author);
+	});
 });

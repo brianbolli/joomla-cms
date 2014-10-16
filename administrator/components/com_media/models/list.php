@@ -34,7 +34,7 @@ class MediaModelList extends JModelLegacy
 			$context = $input->get('context', 'joomla', 'string');
 			$this->setState('context', $context);
 
-			$parent = str_replace("\\", "/", dirname($folder));
+			$parent = str_replace(DIRECTORY_SEPARATOR, "/", dirname($folder));
 			$parent = ($parent == '.') ? null : $parent;
 			$this->setState('parent', $parent);
 			$set = true;

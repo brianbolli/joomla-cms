@@ -77,7 +77,7 @@ class MediaModelManager extends JModelLegacy
 		//$list = JHtml::_('select.genericlist', $groups, 'folderlist', 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, '.$asset.', '.$author.')" ', 'value', 'text', $base);
 		$list = JHtml::_('select.groupedlist', $groups, 'folderlist',
 			array(
-				'list.attr' => 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, this.options[this.selectedIndex].parentNode.getAttribute(\'data-element\'), '.$asset.', '.$author.')" ',
+				'list.attr' => 'size="1" data-asset="' . $asset . '" data-author="' . $author . '"',
 				'id' => 'folderlist',
 				'list.select' => $value,
 				'group.id' => 'id',

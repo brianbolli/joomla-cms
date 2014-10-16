@@ -223,78 +223,80 @@ class PlgMediaAzure extends JPlugin
 			$docs = array();
 			$images = array();
 
-			foreach ($objects as $item)
+			if ($objects)
 			{
+				foreach ($objects as $item)
+				{
 
-					$tmp = new JObject;
-					$tmp->name = $item['name'];
-					$tmp->title = $item['name'];
-					$tmp->path = $item['url'];
-					$tmp->context = self::CONTEXT;
-					$tmp->path_relative = false;
-					$tmp->path_absolute = $item['url'];
-					$tmp->size = $item['size'];
-					$parts = explode('/', $item['content_type']);
+						$tmp = new JObject;
+						$tmp->name = $item['name'];
+						$tmp->title = $item['name'];
+						$tmp->path = $item['url'];
+						$tmp->context = self::CONTEXT;
+						$tmp->path_relative = false;
+						$tmp->path_absolute = $item['url'];
+						$tmp->size = $item['size'];
+						$parts = explode('/', $item['content_type']);
 
-					if ($parts[0] == 'image') {
-						$ext = $parts[1];
-					} else {
-						$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
-					}
+						if ($parts[0] == 'image') {
+							$ext = $parts[1];
+						} else {
+							$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
+						}
 
-					switch ($ext)
-					{
-							// Image
-							case 'jpg':
-							case 'png':
-							case 'gif':
-							case 'xcf':
-							case 'odg':
-							case 'bmp':
-							case 'jpeg':
-							case 'ico':
-									$info = @getimagesize($tmp->path_absolute);
-									$tmp->width		= @$info[0];
-									$tmp->height	= @$info[1];
-									$tmp->type		= @$info[2];
-									$tmp->mime		= @$info['mime'];
+						switch ($ext)
+						{
+								// Image
+								case 'jpg':
+								case 'png':
+								case 'gif':
+								case 'xcf':
+								case 'odg':
+								case 'bmp':
+								case 'jpeg':
+								case 'ico':
+										$info = @getimagesize($tmp->path_absolute);
+										$tmp->width		= @$info[0];
+										$tmp->height	= @$info[1];
+										$tmp->type		= @$info[2];
+										$tmp->mime		= @$info['mime'];
 
-									if (($info[0] > 60) || ($info[1] > 60))
-									{
-											$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
-											$tmp->width_60 = $dimensions[0];
-											$tmp->height_60 = $dimensions[1];
-									}
-									else
-									{
-											$tmp->width_60 = $tmp->width;
-											$tmp->height_60 = $tmp->height;
-									}
+										if (($info[0] > 60) || ($info[1] > 60))
+										{
+												$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
+												$tmp->width_60 = $dimensions[0];
+												$tmp->height_60 = $dimensions[1];
+										}
+										else
+										{
+												$tmp->width_60 = $tmp->width;
+												$tmp->height_60 = $tmp->height;
+										}
 
-									if (($info[0] > 16) || ($info[1] > 16))
-									{
-											$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
-											$tmp->width_16 = $dimensions[0];
-											$tmp->height_16 = $dimensions[1];
-									}
-									else
-									{
-											$tmp->width_16 = $tmp->width;
-											$tmp->height_16 = $tmp->height;
-									}
+										if (($info[0] > 16) || ($info[1] > 16))
+										{
+												$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
+												$tmp->width_16 = $dimensions[0];
+												$tmp->height_16 = $dimensions[1];
+										}
+										else
+										{
+												$tmp->width_16 = $tmp->width;
+												$tmp->height_16 = $tmp->height;
+										}
 
-									$images[] = $tmp;
-									break;
+										$images[] = $tmp;
+										break;
 
-									// Non-image document
-							default:
-									$tmp->icon_32 = "media/mime-icon-32/".$ext.".png";
-									$tmp->icon_16 = "media/mime-icon-16/".$ext.".png";
-									$docs[] = $tmp;
-									break;
-					}
+										// Non-image document
+								default:
+										$tmp->icon_32 = "media/mime-icon-32/".$ext.".png";
+										$tmp->icon_16 = "media/mime-icon-16/".$ext.".png";
+										$docs[] = $tmp;
+										break;
+						}
+				}
 			}
-
 			return array('folders' => array(), 'docs' => $docs, 'images' => $images);
 
 	}
