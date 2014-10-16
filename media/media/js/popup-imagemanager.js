@@ -72,6 +72,9 @@ var ImageManager = this.ImageManager = {
 
 		var context = this.getImageContext();
 
+		document.getElementById('folder').value = folder;
+		document.getElementById('context').value = context;
+
 		a = this._getUriObject($('#uploadForm').attr('action'));
 		q = this._getQueryObject(a.query);
 		q['folder'] = folder;

@@ -30,54 +30,144 @@ class MediaControllerFile extends JControllerLegacy
 	 */
 	function upload()
 	{
-		$params = JComponentHelper::getParams('com_media');
-				//$this->setMessage('Something happened yo', 'Notice');
-				//return;
 		// Check for request forgeries
-		if (!JSession::checkToken('request'))
-		{
-			$this->setMessage(JText::_('JINVALID_TOKEN'), 'Warning');
-			return;
-		}
-
-		// Get the user
-		$user  = JFactory::getUser();
+		JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+		$params = JComponentHelper::getParams('com_media');
 
 		// Get some data from the request
-		$file   = $this->input->files->get('Filedata', '', 'array');
-		$context = $this->input->get('context', 'joomla', 'string');
-		$folder = $this->input->get('folder', '', 'path');
+		$files        = $this->input->files->get('Filedata', '', 'array');
+		$return       = JFactory::getSession()->get('com_media.return_url');
+		$this->folder = $this->input->get('folder', '', 'path');
+		$context      = $this->input->get('context', '', 'string');
 
-		if (
-			$_SERVER['CONTENT_LENGTH'] > ($params->get('upload_maxsize', 0) * 1024 * 1024) ||
-			$_SERVER['CONTENT_LENGTH'] > $mediaHelper->toBytes(ini_get('upload_max_filesize')) ||
-			$_SERVER['CONTENT_LENGTH'] > $mediaHelper->toBytes(ini_get('post_max_size')) ||
-			$_SERVER['CONTENT_LENGTH'] > $mediaHelper->toBytes(ini_get('memory_limit'))
-		)
+		// Set the redirect
+		if ($return)
 		{
-			$this->setMessage(JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'), 'Warning');
-			return;
+			$this->setRedirect($return . '&context=' . $context . '&folder=' . $this->folder);
+		}
+		else
+		{
+			$this->setRedirect('index.php?option=com_media&context=' . $context . '&folder=' . $this->folder);
 		}
 
-		// Trigger the onContentBeforeSave event.
+		// Authorize the user
+		if (!$this->authoriseUser('create'))
+		{
+			return false;
+		}
+
+		// Total length of post back data in bytes.
+		$contentLength = (int) $_SERVER['CONTENT_LENGTH'];
+
+		// Instantiate the media helper
+		$mediaHelper = new JHelperMedia;
+
+		// Maximum allowed size of post back data in MB.
+		$postMaxSize = $mediaHelper->toBytes(ini_get('post_max_size'));
+
+		// Maximum allowed size of script execution in MB.
+		$memoryLimit = $mediaHelper->toBytes(ini_get('memory_limit'));
+
+		// Check for the total size of post back data.
+		if (($postMaxSize > 0 && $contentLength > $postMaxSize)
+			|| ($memoryLimit != -1 && $contentLength > $memoryLimit))
+		{
+			JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_WARNUPLOADTOOLARGE'));
+
+			return false;
+		}
+
+		$uploadMaxSize = $params->get('upload_maxsize', 0) * 1024 * 1024;
+		$uploadMaxFileSize = $mediaHelper->toBytes(ini_get('upload_max_filesize'));
+
+		// Perform basic checks on file info before attempting anything
+		foreach ($files as &$file)
+		{
+			$file['name']     = JFile::makeSafe($file['name']);
+			$file['filepath'] = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $this->folder, $file['name'])));
+
+			if (($file['error'] == 1)
+				|| ($uploadMaxSize > 0 && $file['size'] > $uploadMaxSize)
+				|| ($uploadMaxFileSize > 0 && $file['size'] > $uploadMaxFileSize))
+			{
+				// File size exceed either 'upload_max_filesize' or 'upload_maxsize'.
+				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'));
+
+				return false;
+			}
+
+			if (JFile::exists($file['filepath']))
+			{
+				// A file with this name already exists
+				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_FILE_EXISTS'));
+
+				return false;
+			}
+
+			if (!isset($file['name']))
+			{
+				// No filename (after the name was cleaned by JFile::makeSafe)
+				$this->setRedirect('index.php', JText::_('COM_MEDIA_INVALID_REQUEST'), 'error');
+
+				return false;
+			}
+		}
+
+		// Set FTP credentials, if given
+		JClientHelper::setCredentialsFromRequest('ftp');
 		JPluginHelper::importPlugin('content');
 		JPluginHelper::importPlugin('media');
 		$dispatcher	= JEventDispatcher::getInstance();
 
-		$object_file = new JObject($file);
-		$object_file->filepath = $filepath;
-		$dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
-
-		$response = new stdClass();
-		$response->message = false;
-		$response->type = false;
-
-		// Trigger the onMediaFileUpload event.
-		$dispatcher->trigger('onMediaUploadFile', array($context, $folder, $file, &$response));
-
-		if ($response->message)
+		foreach ($files as &$file)
 		{
-			$this->setMessage($response->message, $response->type);
+			// The request is valid
+			$err = null;
+
+			if (!MediaHelper::canUpload($file, $err))
+			{
+				// The file can't be uploaded
+
+				return false;
+			}
+
+			// Make the filename safe
+			$file['name'] = JFile::makeSafe($file['name']);
+			$file['filepath'] = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $this->folder, $file['name'])));
+
+			// Trigger the onContentBeforeSave event.
+			$object_file = new JObject($file);
+			$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.file', &$object_file, true));
+
+			if (in_array(false, $result, true))
+			{
+				// There are some errors in the plugins
+				$this->setMessage(JText::plural('COM_MEDIA_ERROR_BEFORE_SAVE', count($errors = $object_file->getErrors()), implode('<br />', $errors)) , 'Warning');
+				return false;
+			}
+
+			$response = new stdClass();
+			$response->message = false;
+			$response->type = false;
+
+			// Trigger the onMediaUploadFile event.
+			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, $this->folder, &$response));
+
+			if ($response->message)
+			{
+				// Error in upload
+				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_UNABLE_TO_UPLOAD_FILE'));
+				$this->setMessage($response->message, $response->type);
+				return false;
+			}
+			else
+			{
+				// Trigger the onContentAfterSave event.
+				$dispatcher->trigger('onContentAfterSave', array('com_media.file', &$object_file, true));
+				$this->setMessage(JText::sprintf('COM_MEDIA_UPLOAD_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+			}
 		}
+
+		echo new JResponseJson(true);
 	}
 }
