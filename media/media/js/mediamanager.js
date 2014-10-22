@@ -18,6 +18,7 @@ var MediaManager = this.MediaManager = {
 		this.folderframe	= $('#folderframe');
 		this.folderpath		= $('#folderpath');
 		this.mediacontext	= $('#context');
+		this.uploadmedia	= $('#collapseUpload');
 
 		this.updatepaths	= $('input.update-folder');
 		this.updatecontexts = $('input.update-context');
@@ -39,6 +40,7 @@ var MediaManager = this.MediaManager = {
 
 	onloadframe: function()
 	{
+		console.log('MEDIA MANAGER: ON LOAD FRAME');
 		// Update the frame url
 		this.frameurl = this.frame.location.href;
 
@@ -52,9 +54,13 @@ var MediaManager = this.MediaManager = {
 			this.folderpath.value = basepath;
 		}
 
-		console.log(context);
-		if (context) {
+		console.log('active context:' + this.activeContext);
+		console.log('context: ' + context);
+		if (typeof this.activeContext !== "undefined" && this.activeContext !== context) {
+			console.log('new context, must update form');
 			this.updatecontexts.each(function(path, el){ el.value = context})
+			var url = 'index.php?option=com_media&task=file.uploadmediaForm&context=' + context + '&folder=' + folder + '&format=json';
+			this._processAjaxRequest(url, '#uploadMedia-container');
 		}
 
 		$('#' + viewstyle).addClass('active');
@@ -79,6 +85,13 @@ var MediaManager = this.MediaManager = {
 		} else {
 			$('#uploadForm').attr('action', a.scheme+'://'+a.domain+a.path+'?'+a.query);
 		}
+	},
+
+	updateUploadMediaForm: function(html) {
+		console.log('UPDATE UPLOAD MEDIA FORM');
+		console.log(this.uploadmedia);
+		console.log(html);
+
 	},
 
 	oncreatefolder: function()
@@ -148,6 +161,67 @@ var MediaManager = this.MediaManager = {
 		return params;
 	},
 
+	initializeFolderTree: function()
+	{
+
+		this.mediatree = $('#media-tree_tree');
+
+		var f = document.getElementById('folder').value;
+		var c = document.getElementById('context').value;
+
+		this.activeContext = c;
+
+		if (typeof f !== 'undefined' && typeof c !== 'undefined') {
+			this.mediatree.find('li').removeClass('active');
+			if (f.length === 0) {
+				$('li#' + c).addClass('active');
+			} else {
+				var activeId = f.replace('/','-');
+				$('li#' + activeId).addClass('active');
+			}
+		}
+
+		this.mediatree.find('li').each(function(){
+			if ($(this).children('ul').length > 0) {
+				$(this).addClass('children');
+				$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
+			} else {
+				$(this).addClass('childless');
+			}
+		});
+
+		$('li.children').on('shown', function(){
+			$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
+		});
+
+		$('li.children').on('hidden', function(){
+			$(this).children('i').removeClass('icon-folder-open').addClass('icon-folder-2')
+		});
+	},
+
+	_processAjaxRequest: function(url, replace) {
+		console.log('process new ajax request to ' + url);
+		$.ajax({
+			url: url,
+			dataType: 'html',
+			success: function(response) {
+				console.log(response);
+
+				if (!response.success && response.message) {
+					alert(response.message);
+				}
+
+				if (response.messages) {
+					Joomla.renderMessages(repsonse.messages);
+				}
+
+				console.log(replace);
+				$(replace).replaceWith(response.data);
+
+			}
+		})
+	},
+
 	_setFrameUrl: function(url)
 	{
 		if (url != null) {
@@ -185,4 +259,6 @@ jQuery(function(){
 	MediaManager.trace = 'start';
 	document.updateUploader = function() { MediaManager.onloadframe(); };
 	MediaManager.onloadframe();
+
+	document.getElementById('folderframe').onload = function() { MediaManager.initializeFolderTree();	};
 });

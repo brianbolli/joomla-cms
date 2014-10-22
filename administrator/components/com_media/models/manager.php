@@ -56,8 +56,6 @@ class MediaModelManager extends JModelLegacy
 		JPluginHelper::importPlugin('media');
 		$dispatcher->trigger('onMediaGetFolderlist', array(&$groups, $base, &$response));
 
-		//var_dump($groups);die;
-
 		// Get asset and author id (use integer filter)
 		$input = JFactory::getApplication()->input;
 		$asset = $input->get('asset', 0, 'integer');
@@ -71,10 +69,9 @@ class MediaModelManager extends JModelLegacy
 
 		$author = $input->get('author', 0, 'integer');
 
-		$value = 'joomla./banners/';
+		$value = $input->get('folder', 'banners'. 'string');
 
 		// Create the drop-down folder select list
-		//$list = JHtml::_('select.genericlist', $groups, 'folderlist', 'size="1" onchange="ImageManager.setFolder(this.options[this.selectedIndex].value, '.$asset.', '.$author.')" ', 'value', 'text', $base);
 		$list = JHtml::_('select.groupedlist', $groups, 'folderlist',
 			array(
 				'list.attr' => 'size="1" data-asset="' . $asset . '" data-author="' . $author . '"',
@@ -87,9 +84,15 @@ class MediaModelManager extends JModelLegacy
 				'option.text.toHtml' => false
 			)
 		);
+
 		return $list;
 	}
 
+	/**
+	 *
+	 * @param string $base
+	 * @return multitype:multitype: StdClass
+	 */
 	function getFolderTree($base = null) {
 		$response = new stdClass();
 		$response->message = false;
@@ -97,15 +100,30 @@ class MediaModelManager extends JModelLegacy
 
 		$tree = array();
 		$tree['children'] = array();
-		//$tree = new JFolderTree();
 
 		$dispatcher = JDispatcher::getInstance();
 		JPluginHelper::importPlugin('media');
 		$dispatcher->trigger('onMediaGetFolderTree', array(&$tree, &$response));
 
 		$tree['data'] = (object) array('name' => JText::_('COM_MEDIA_MEDIA'), 'context' => '', 'subfolders' => true, 'relative' => '', 'absolute' => COM_MEDIA_BASE);
+
 		return $tree;
-		//$tree->setData(JText::_('COM_MEDIA_ROOT'), '', '', $base);
-		//return $tree->getTreeArray();
+	}
+
+	function getForm() {
+		$context = JFactory::getApplication()->input->get('context', 'joomla', 'string');
+		$response = new stdClass();
+		$response->message = false;
+		$response->type = false;
+
+		JFormHelper::addformPath(JPATH_COMPONENT_ADMINISTRATOR . '/models/forms/');
+		$form = new JForm('uploadmedia');
+		$form->loadFile('uploadmedia');
+
+		$dispatcher = JDispatcher::getInstance();
+		JPluginHelper::importPlugin('media');
+		$dispatcher->trigger('onMediaPrepareForm', array($context, &$tree, &$response));
+
+		return $form;
 	}
 }

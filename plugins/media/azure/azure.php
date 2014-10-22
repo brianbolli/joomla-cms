@@ -201,6 +201,61 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
+
+	public function onMediaGetFolderTree(&$tree, &$response) {
+
+		if ($this->azure)
+		{
+			$baseUrl = $this->azure->getBaseUrl();
+			$containers = $this->azure->listContainers();
+
+			$children = array();
+			$tmp = &$children;
+			foreach ($containers as $container) {
+
+					$folder		= $container['name'];
+					$name		= $container['name'];
+					$relative	= str_replace($baseUrl, '', $container['url']);
+					$absolute	= $container['url'];
+					//$path		= explode('/', $relative);
+					$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'relative' => $relative, 'absolute' => $absolute);
+					$tmp['children'][$relative] = array('data' => $node, 'children' => array());
+			}
+
+			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'relative' => '', 'absolute' => $baseUrl);
+			array_push($tree['children'], $children);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Method to handle the "onContentPrepareForm" event and alter the user registration form.  We
+	 * are going to check and make sure that the form being prepared is the user registration form
+	 * from the com_users component first.  If that is the form we are preparing, then we will
+	 * load our custom xml file into the form object which adds our custom fields.
+	 *
+	 * @param   JForm  $form  The form to be altered.
+	 * @param   array  $data  The associated data for the var_dump($user_sugar_id);error_log($user_sugar_id);form.
+	 *
+	 * @return  bool
+	 *
+	 * @since   1.0
+	 */
+	public function onMediaPrepareForm($context, $form)
+	{
+		if (!($form instanceof JForm))
+		{
+			return false;
+		}
+
+		if ($context === self::CONTEXT)
+		{
+			JFormHelper::addFormPath(JPATH_ROOT . '/plugins/media/azure/forms/');
+			$form->load('uploadblob');
+		}
+	}
+
 	private function buildFolderListObjects($objects) {
 		$folders = array();
 
@@ -315,30 +370,4 @@ class PlgMediaAzure extends JPlugin
 			}
 	}
 
-	public function onMediaGetFolderTree(&$tree, &$response) {
-		if ($this->azure)
-		{
-			$baseUrl = $this->azure->getBaseUrl();
-			$containers = $this->azure->listContainers();
-
-			$children = array();
-			$tmp = &$children;
-			foreach ($containers as $container) {
-
-				$folder		= $container['name'];
-				$name		= $container['name'];
-				$relative	= str_replace($baseUrl, '', $container['url']);
-				$absolute	= $container['url'];
-				//$path		= explode('/', $relative);
-				$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'relative' => $relative, 'absolute' => $absolute);
-				$tmp['children'][$relative] = array('data' => $node, 'children' => array());
-			}
-
-			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'relative' => '', 'absolute' => $baseUrl);
-			array_push($tree['children'], $children);
-
-		}
-
-		return true;
-	}
 }

@@ -343,4 +343,5 @@ class MediaControllerFile extends JControllerLegacy
 	}
 
 
+
 }

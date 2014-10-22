@@ -55,33 +55,9 @@ $input = JFactory::getApplication()->input;
 		</form>
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
-		<!-- File Upload Form -->
-		<div id="collapseUpload" class="collapse">
-			<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $this->session->getName().'='.$this->session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadForm" class="form-inline" name="uploadForm" method="post" enctype="multipart/form-data">
-				<div id="uploadform">
-					<fieldset id="upload-noflash" class="actions">
-							<label for="upload-file" class="control-label"><?php echo JText::_('COM_MEDIA_UPLOAD_FILE'); ?></label>
-							<input type="file" id="upload-file" name="Filedata[]" multiple /> <button class="btn btn-primary" id="upload-submit"><i class="icon-upload icon-white"></i> <?php echo JText::_('COM_MEDIA_START_UPLOAD'); ?></button>
-							<p class="help-block"><?php echo $this->config->get('upload_maxsize') == '0' ? JText::_('COM_MEDIA_UPLOAD_FILES_NOLIMIT') : JText::sprintf('COM_MEDIA_UPLOAD_FILES', $this->config->get('upload_maxsize')); ?></p>
-					</fieldset>
-					<input class="update-folder" type="hidden" name="folder" id="folder" value="<?php echo $this->state->folder; ?>" />
-					<input class="update-context" type="hidden" name="context" id="context" value="<?php echo $this->state->context; ?>" />
-					<?php JFactory::getSession()->set('com_media.return_url', 'index.php?option=com_media'); ?>
-				</div>
-			</form>
-		</div>
-		<div id="collapseFolder" class="collapse">
-			<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" class="form-inline" method="post">
-					<div class="path">
-						<input type="text" id="folderpath" readonly="readonly" class="update-folder" />
-						<input type="text" id="foldername" name="foldername" />
-						<input class="update-folder" type="hidden" name="folderbase" id="folderbase" value="<?php echo $this->state->folder; ?>" />
-						<input class="update-context" type="hidden" name="contextbase" id="contextbase" value="<?php echo $this->state->context; ?>" />
-						<button type="submit" class="btn"><i class="icon-folder-open"></i> <?php echo JText::_('COM_MEDIA_CREATE_FOLDER'); ?></button>
-					</div>
-					<?php echo JHtml::_('form.token'); ?>
-			</form>
-		</div>
+			<div id="uploadMedia-container">
+				<?php echo $this->loadLayout('uploadmedia', array('folder' => $this->state->folder, 'context' => $this->state->context, 'form' => $this->form)); ?>
+			</div>
 		<?php endif;?>
 
 		<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" method="post">
@@ -95,62 +71,3 @@ $input = JFactory::getApplication()->input;
 	</div>
 	<!-- End Content -->
 </div>
-<script>
-(function($){
-	//var context, folder;
-
-	$(function(){
-
-		function newFolderTreeActive() {
-			var f = document.getElementById('folder').value;
-			var c = document.getElementById('context').value;
-			console.log('folder: ' + f);
-			console.log(f.length);
-			console.log('context: ' + c);
-			console.log(c.length);
-			if (typeof f !== 'undefined' && typeof c !== 'undefined') {
-				$('#media-tree_tree').find('li').removeClass('active');
-				if (f.length === 0) {
-					$('li#' + c).addClass('active');
-				} else {
-					var activeId = f.replace('/','-');
-					$('li#' + activeId).addClass('active');
-				}
-			}
-		}
-
-		document.getElementById('folderframe').onload = function() {
-			newFolderTreeActive();
-		}
-
-		$('#media-tree_tree').find('li').each(function(){
-			if ($(this).children('ul').length > 0) {
-				$(this).addClass('children');
-				$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
-			} else {
-				$(this).addClass('childless');
-			}
-		});
-
-		$('li.children').on('shown', function(){
-			$(this).children('i').removeClass('icon-folder-2').addClass('icon-folder-open');
-		});
-
-		$('li.children').on('hidden', function(){
-			$(this).children('i').removeClass('icon-folder-open').addClass('icon-folder-2')
-		});
-
-	});
-
-	function newFolderTreeActive(folder, context) {
-		if (folder.value.length === 0) {
-			$('li#' + context.value).addClass('active');
-		} else {
-			var path = folder.value.explode('/');
-			var last = path.length - 1;
-			$('li#' + path[last]).addClass('active');
-		}
-	}
-
-})(jQuery);
-</script>

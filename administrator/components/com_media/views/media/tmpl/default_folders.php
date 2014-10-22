@@ -24,7 +24,7 @@ $ulTarget = ($this->folders['data']->relative) ? str_replace('/', '-', $this->fo
 	$target = (empty($folder['data']->relative)) ? $folder['data']->context : $folder['data']->relative;
 	$target = str_replace('/', '-', $target); ?>
 	<li id="<?php echo $target; ?>" class="">
-		<i class="icon-folder-2 pull-left" data-toggle="collapse" data-target="#collapseFolder-<?php echo $target; ?>"></i>
+		<i class="<?php echo (count($folder['children']) > 0) ? 'icon-folder-open' : 'icon-folder-2'; ?> pull-left" data-toggle="collapse" data-target="#collapseFolder-<?php echo $target; ?>"></i>
 		<a href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $folder['data']->context; ?>&amp;folder=<?php echo $folder['data']->relative; ?>" class="show-contents" target="folderframe">
 			<?php echo $folder['data']->name; ?>
 		</a>

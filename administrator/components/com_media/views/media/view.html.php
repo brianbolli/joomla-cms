@@ -91,6 +91,7 @@ class MediaViewMedia extends JViewLegacy
 		$this->config = &$config;
 		$this->state = &$state;
 		$this->require_ftp = $ftp;
+		$this->form = $this->get('Form');
 		$this->folders_id = ' id="media-tree"';
 		$this->folders = $this->get('FolderTree');
 
@@ -172,5 +173,11 @@ class MediaViewMedia extends JViewLegacy
 			$this->folders = $tmp;
 		}
 		return $txt;
+	}
+
+	function loadLayout($layout, $data, $path = '/components/com_media/layouts') {
+		$layout = new JLayoutFile($layout, JPATH_COMPONENT_ADMINISTRATOR . $path);
+		return $layout->render($data);
+
 	}
 }

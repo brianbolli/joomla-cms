@@ -170,4 +170,14 @@ class MediaControllerFile extends JControllerLegacy
 
 		echo new JResponseJson(true);
 	}
+
+	function uploadmediaForm() {
+		$model = JModelLegacy::getInstance('Manager', 'MediaModel');
+		$state = $model->getState();
+		$form = $model->getForm();
+		$layout = new JLayoutFile('uploadmedia', JPATH_COMPONENT_ADMINISTRATOR . '/layouts/');
+		$data = $layout->render(array('folder' => $state->get('folder'), 'context' => $state->get('context'), 'form' => $form));
+
+		echo new JResponseJson(htmlentities($data));
+	}
 }
