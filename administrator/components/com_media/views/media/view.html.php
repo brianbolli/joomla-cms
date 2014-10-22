@@ -74,11 +74,6 @@ class MediaViewMedia extends JViewLegacy
 		";
 		$document->addScriptDeclaration($js);
 
-		//jimport('joomla.filesystem.folder');
-		//$test = JFolder::folders(COM_MEDIA_BASE . '/banners', '.');
-
-		//var_dump($test);die;
-
 		/*
 		 * Display form for FTP credentials?
 		 * Don't set them here, as there are other functions called before this one if there is any file write operation
@@ -94,8 +89,6 @@ class MediaViewMedia extends JViewLegacy
 		$this->form = $this->get('Form');
 		$this->folders_id = ' id="media-tree"';
 		$this->folders = $this->get('FolderTree');
-
-		//var_dump($this->folders);die;
 
 		// Set the toolbar
 		$this->addToolbar();

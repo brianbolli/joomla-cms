@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="uploadcontainer" label="PLG_MEDIA_AZURE_UPLOADCONTAINER_DEFAULT_LABEL" addfieldpath="plugins/media/azure/fields">
+
+		<field
+			name="access_type"
+			type="AccessType"
+			label="Access Type"
+			description="Access Type of the new Azure Blob container you wish to create"
+			labelclass="control-label"
+		/>
+
+	</fieldset>
+</form>

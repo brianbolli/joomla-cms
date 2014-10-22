@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form>
 	<fieldset
-		name="properties"
-		label="COM_LOFT_J_AZURE_PROPERTIES_FIELDSET_LABEL"
-		addfieldpath="administrator/components/com_loft_j_azure/models/fields">
+		name="uploadblob"
+		label="PLG_MEDIA_AZURE_UPLOADBLOB_DEFAULT_LABEL"
+		addfieldpath="plugins/media/azure/fields">
 
 		<field
 			name="content_type"
 			type="ContentType"
-			label="COM_LOFT_J_AZURE_FIELD_CONTENT_TYPE_LABEL"
-			description="COM_LOFT_J_AZURE_FIELD_CONTENT_TYPE_DESC"
+			label="PLG_MEDIA_AZURE_FIELD_CONTENT_TYPE_LABEL"
+			description="PLG_MEDIA_AZURE_FIELD_CONTENT_TYPE_DESC"
+			labelclass="control-label"
 		/>
 
 		<field
 			name="cache_control"
 			type="text"
-			label="COM_LOFT_J_AZURE_FIELD_CACHE_CONTROL_LABEL"
-			description="COM_LOFT_J_AZURE_FIELD_CACHE_CONTROL_DESC"
+			label="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_LABEL"
+			description="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_DESC"
 			class="readonly"
 			readonly="true"
+			labelclass="control-label"
 		/>
 
 	</fieldset>

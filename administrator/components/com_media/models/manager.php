@@ -111,18 +111,46 @@ class MediaModelManager extends JModelLegacy
 	}
 
 	function getForm() {
-		$context = JFactory::getApplication()->input->get('context', 'joomla', 'string');
+		$context = $this->getState('context');
+
 		$response = new stdClass();
 		$response->message = false;
 		$response->type = false;
 
-		JFormHelper::addformPath(JPATH_COMPONENT_ADMINISTRATOR . '/models/forms/');
-		$form = new JForm('uploadmedia');
-		$form->loadFile('uploadmedia');
+		// Get the form.
+		JForm::addFormPath(JPATH_COMPONENT . '/models/forms');
+		JForm::addFieldPath(JPATH_COMPONENT . '/models/fields');
 
-		$dispatcher = JDispatcher::getInstance();
-		JPluginHelper::importPlugin('media');
-		$dispatcher->trigger('onMediaPrepareForm', array($context, &$tree, &$response));
+		try
+		{
+			$form = JForm::getInstance('com_media.uploadmedia', 'uploadmedia', array('control' => 'jform', 'load_data' => false));
+			$data = array();
+
+			$dispatcher = JDispatcher::getInstance();
+			JPluginHelper::importPlugin('media');
+			$results = $dispatcher->trigger('onMediaPrepareForm', array($context, &$form, &$response));
+
+			// Check for errors encountered while preparing the form.
+			if (count($results) && in_array(false, $results, true))
+			{
+				// Get the last error.
+				$error = $dispatcher->getError();
+
+				if (!($error instanceof Exception))
+				{
+					throw new Exception($error);
+				}
+			}
+
+
+			// Load the data into the form after the plugins have operated.
+			$form->bind($data);
+		}
+		catch (Exception $e)
+		{
+				$this->setError($e->getMessage());
+				return false;
+		}
 
 		return $form;
 	}

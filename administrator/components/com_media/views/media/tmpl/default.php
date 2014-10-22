@@ -11,8 +11,6 @@ defined('_JEXEC') or die;
 
 $user  = JFactory::getUser();
 $input = JFactory::getApplication()->input;
-//var_dump($this->state);
-
 ?>
 <div class="row-fluid">
 	<!-- Begin Sidebar -->
@@ -55,8 +53,11 @@ $input = JFactory::getApplication()->input;
 		</form>
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
-			<div id="uploadMedia-container">
-				<?php echo $this->loadLayout('uploadmedia', array('folder' => $this->state->folder, 'context' => $this->state->context, 'form' => $this->form)); ?>
+			<div id="collapseUpload" class="collapse">
+
+			</div>
+			<div id="collapseFolder" class="collapse">
+
 			</div>
 		<?php endif;?>
 

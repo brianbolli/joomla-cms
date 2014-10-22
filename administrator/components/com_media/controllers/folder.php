@@ -152,4 +152,9 @@ class MediaControllerFolder extends JControllerLegacy
 
 		return true;
 	}
+
+	public function form()
+	{
+
+	}
 }

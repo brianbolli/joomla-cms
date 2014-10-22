@@ -10,6 +10,8 @@
 
 defined('_JEXEC') or die;
 
+jimport('joomla.plugin.plugin');
+
 JLoader::register('JAzure', JPATH_ROOT . '/plugins/media/azure/library/jazure.php');
 
 /**
@@ -229,20 +231,7 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	/**
-	 * Method to handle the "onContentPrepareForm" event and alter the user registration form.  We
-	 * are going to check and make sure that the form being prepared is the user registration form
-	 * from the com_users component first.  If that is the form we are preparing, then we will
-	 * load our custom xml file into the form object which adds our custom fields.
-	 *
-	 * @param   JForm  $form  The form to be altered.
-	 * @param   array  $data  The associated data for the var_dump($user_sugar_id);error_log($user_sugar_id);form.
-	 *
-	 * @return  bool
-	 *
-	 * @since   1.0
-	 */
-	public function onMediaPrepareForm($context, $form)
+	public function onMediaPrepareFileForm($context, &$form, &$response)
 	{
 		if (!($form instanceof JForm))
 		{
@@ -251,9 +240,27 @@ class PlgMediaAzure extends JPlugin
 
 		if ($context === self::CONTEXT)
 		{
-			JFormHelper::addFormPath(JPATH_ROOT . '/plugins/media/azure/forms/');
-			$form->load('uploadblob');
+			JForm::addFormPath(JPATH_ROOT . '/plugins/media/azure/forms');
+			$form->loadFile('uploadblob', false);
 		}
+
+		return true;
+	}
+
+	public function onMediaPrepareFolderForm($context, &$form, &$response)
+	{
+		if (!($form instanceof JForm))
+		{
+			return false;
+		}
+
+		if ($context === self::CONTEXT)
+		{
+			JForm::addFormPath(JPATH_ROOT . '/plugins/media/azure/forms');
+			$form->loadFile('uploadcontainer', false);
+		}
+
+		return true;
 	}
 
 	private function buildFolderListObjects($objects) {

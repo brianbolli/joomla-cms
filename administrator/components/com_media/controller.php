@@ -74,6 +74,9 @@ class MediaController extends JControllerLegacy
 			$view->setModel($model, true);
 		}
 
+		$this->registerTask('file.form', 'form');
+		$this->registerTask('folder.form', 'form');
+
 		// Set the layout
 		$view->setLayout($vLayout);
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+	<fieldset name="uploadfolder" label="COM_MEDIA_UPLOADFOLDER_DEFAULT_LABEL">
+		<field
+			name="folderpath"
+			type="text"
+			label="Parent Folder"
+			description=""
+			readonly="readonly"
+			class="update-folder"
+			labelclass="control-label"
+		/>
+		<field
+			name="foldername"
+			type="text"
+			label="Folder Name"
+			description=""
+			labelclass="control-label"
+		/>
+	</fieldset>
+</form>

@@ -43,9 +43,11 @@ var MediaManager = this.MediaManager = {
 		console.log('MEDIA MANAGER: ON LOAD FRAME');
 		// Update the frame url
 		this.frameurl = this.frame.location.href;
-
+		console.log(this.frameurl);
 		var context = this.getContext();
 		var folder = this.getFolder();
+		console.log('context: ' + context);
+		console.log('folder: ' + folder);
 		if (folder) {
 			this.updatepaths.each(function(path, el){ el.value =folder; });
 			this.folderpath.value = basepath+'/'+folder;
@@ -54,14 +56,11 @@ var MediaManager = this.MediaManager = {
 			this.folderpath.value = basepath;
 		}
 
-		console.log('active context:' + this.activeContext);
-		console.log('context: ' + context);
-		if (typeof this.activeContext !== "undefined" && this.activeContext !== context) {
-			console.log('new context, must update form');
-			this.updatecontexts.each(function(path, el){ el.value = context})
-			var url = 'index.php?option=com_media&task=file.uploadmediaForm&context=' + context + '&folder=' + folder + '&format=json';
-			this._processAjaxRequest(url, '#uploadMedia-container');
-		}
+		this.updatecontexts.each(function(path, el){ el.value = context})
+		this.updateMediaFileForm(context, folder);
+		this.updateMediaFolderForm(context, folder);
+
+		return true;
 
 		$('#' + viewstyle).addClass('active');
 
@@ -87,11 +86,14 @@ var MediaManager = this.MediaManager = {
 		}
 	},
 
-	updateUploadMediaForm: function(html) {
-		console.log('UPDATE UPLOAD MEDIA FORM');
-		console.log(this.uploadmedia);
-		console.log(html);
+	updateMediaFileForm: function(context, folder) {
+		var url = 'index.php?option=com_media&task=file.form&context=' + context + '&folder=' + folder + '&format=json';
+		this._processAjaxRequest(url, '#collapseUpload');
+	},
 
+	updateMediaFolderForm: function(context, folder) {
+		var url = 'index.php?option=com_media&task=folder.form&context=' + context + '&folder=' + folder + '&format=json';
+		this._processAjaxRequest(url, '#collapseFolder');
 	},
 
 	oncreatefolder: function()
@@ -123,7 +125,8 @@ var MediaManager = this.MediaManager = {
 		var args	= this.parseQuery(url);
 
 		if (args['folder'] == "undefined") {
-			args['folder'] = "";
+			//args['folder'] = "";
+			args['folder'] = document.getElementById('folder').value;
 		}
 
 		return args['folder'];
@@ -203,7 +206,7 @@ var MediaManager = this.MediaManager = {
 		console.log('process new ajax request to ' + url);
 		$.ajax({
 			url: url,
-			dataType: 'html',
+			dataType: 'json',
 			success: function(response) {
 				console.log(response);
 
@@ -215,9 +218,13 @@ var MediaManager = this.MediaManager = {
 					Joomla.renderMessages(repsonse.messages);
 				}
 
-				console.log(replace);
-				$(replace).replaceWith(response.data);
+				$(replace).html(response.data);
 
+			},
+			error: function(x,y,z) {
+				console.log(x);
+				console.log(y);
+				console.log(z);
 			}
 		})
 	},
