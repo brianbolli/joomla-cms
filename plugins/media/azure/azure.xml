@@ -67,6 +67,16 @@
 					class="env_checkbox"
 					default="0"
 				/>
+
+				<field
+					name="azure_cdn_url"
+					type="url"
+					label="PLG_MEDIA_AZURE_FIELD_CDN_URL_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_CDN_URL_DESC"
+					class="env_checkbox"
+					default="0"
+				/>
+
 			</fieldset>
 		</fields>
 	</config>
