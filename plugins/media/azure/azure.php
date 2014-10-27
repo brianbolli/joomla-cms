@@ -24,7 +24,8 @@ JLoader::register('JAzure', JPATH_ROOT . '/plugins/media/azure/library/jazure.ph
 class PlgMediaAzure extends JPlugin
 {
 
-	const CONTEXT = 'azure';
+	const CONTEXT = 'com_media.azure';
+	const NAME = 'azure';
 
 	protected $azure = false;
 
@@ -73,11 +74,10 @@ class PlgMediaAzure extends JPlugin
 
 	}
 
-	public function onMediaCreateFolder($context, $folder, $parent, &$response) {
+	public function onMediaCreateFolder($context, $parent, $folder, $folderCheck, &$response) {
 
 		if ($context === self::CONTEXT) {
 			$result = $this->azure->createContainer(strtolower($folder));
-			var_dump($result);
 		}
 
 	}
@@ -132,8 +132,8 @@ class PlgMediaAzure extends JPlugin
 		}
 
 
-		$groups[self::CONTEXT] = array(
-			'id' => self::CONTEXT,
+		$groups[self::NAME] = array(
+			'id' => self::NAME,
 			'label' => JText::_('PLG_MEDIA_AZURE'),
 			'items' => $tmp
 		);
@@ -143,7 +143,7 @@ class PlgMediaAzure extends JPlugin
 	}
 
 
-	public function onMediaGetList(&$list, $context, $current, &$response) {
+	public function onMediaGetList($context, &$list, $current, &$response) {
 			if (JFactory::getApplication()->input->get('view') == 'imagesList') {
 					$mediaList = false;
 			} else {
@@ -220,11 +220,11 @@ class PlgMediaAzure extends JPlugin
 					$relative	= str_replace($baseUrl, '', $container['url']);
 					$absolute	= $container['url'];
 					//$path		= explode('/', $relative);
-					$node		= (object) array('name' => $name, 'context' => self::CONTEXT, 'relative' => $relative, 'absolute' => $absolute);
+					$node		= (object) array('name' => $name, 'context' => self::NAME, 'relative' => $relative, 'absolute' => $absolute);
 					$tmp['children'][$relative] = array('data' => $node, 'children' => array());
 			}
 
-			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::CONTEXT, 'relative' => '', 'absolute' => $baseUrl);
+			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::NAME, 'relative' => '', 'absolute' => $baseUrl);
 			array_push($tree['children'], $children);
 		}
 
@@ -271,7 +271,7 @@ class PlgMediaAzure extends JPlugin
 				$tmp = new JObject();
 				$tmp->name = $item['name'];
 				$tmp->path = $item['url'];
-				$tmp->context = self::CONTEXT;
+				$tmp->context = self::NAME;
 				$tmp->path_relative = $item['name'];
 				$tmp->files = 0;
 				$tmp->folders = 0;
@@ -294,7 +294,7 @@ class PlgMediaAzure extends JPlugin
 						$tmp->name = $item['name'];
 						$tmp->title = $item['name'];
 						$tmp->path = $item['url'];
-						$tmp->context = self::CONTEXT;
+						$tmp->context = self::NAME;
 						$tmp->path_relative = false;
 						$tmp->path_absolute = $item['url'];
 						$tmp->size = $item['size'];

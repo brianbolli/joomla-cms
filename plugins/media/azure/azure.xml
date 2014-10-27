@@ -22,6 +22,7 @@
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
+
 				<field
 					name="azure_enabled"
 					type="radio"
@@ -32,6 +33,7 @@
 					<option value="0">No</option>
 					<option value="1">Yes</option>
 				</field>
+
 				<field
 					name="azure_default_endpoint"
 					type="text"
@@ -40,6 +42,15 @@
 					<option value="http">http</option>
 					<option value="https">https</option>
 				</field>
+
+				<field
+					name="azure_cdn_url"
+					type="url"
+					label="PLG_MEDIA_AZURE_FIELD_CDN_URL_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_CDN_URL_DESC"
+					class="env_checkbox"
+					default="0"
+				/>
 
 				<field
 					name="azure_account_name"

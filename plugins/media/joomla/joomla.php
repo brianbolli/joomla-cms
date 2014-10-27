@@ -21,7 +21,8 @@ jimport('joomla.filesystem.folder');
  */
 class PlgMediaJoomla extends JPlugin
 {
-	const CONTEXT = 'joomla';
+	const CONTEXT = 'com_media.joomla';
+	const NAME = 'joomla';
 
 	public function onMediaUploadFile($context, &$object_file, $folder, &$response) {
 
@@ -96,7 +97,7 @@ class PlgMediaJoomla extends JPlugin
 		return true;
 	}
 
-	public function onMediaCreateFolder($context, $folder, $parent, &$response) {
+	public function onMediaCreateFolder($context, $parent, $folder, $folderCheck, &$response) {
 
 		$app = JFactory::getApplication();
 
@@ -164,7 +165,7 @@ class PlgMediaJoomla extends JPlugin
 		return true;
 	}
 
-	public function onMediaGetList(&$list, $context, $current, &$response) {
+	public function onMediaGetList($context, &$list, $current, &$response) {
 		if ($context === self::CONTEXT)
 		{
 			// If undefined, set to empty
@@ -210,7 +211,7 @@ class PlgMediaJoomla extends JPlugin
 						$tmp->path = str_replace(DIRECTORY_SEPARATOR, '/', JPath::clean($basePath . '/' . $file));
 						$tmp->path_relative = str_replace($mediaBase, '', $tmp->path);
 						$tmp->size = filesize($tmp->path);
-						$tmp->context = self::CONTEXT;
+						$tmp->context = self::NAME;
 
 						$ext = strtolower(JFile::getExt($file));
 						switch ($ext)
@@ -275,7 +276,7 @@ class PlgMediaJoomla extends JPlugin
 					{
 							$tmp = new JObject;
 							$tmp->name = basename($folder);
-							$tmp->context = self::CONTEXT;
+							$tmp->context = self::NAME;
 							$tmp->path = str_replace(DIRECTORY_SEPARATOR, '/', JPath::clean($basePath . '/' . $folder));
 							$tmp->path_relative = str_replace($mediaBase, '', $tmp->path);
 							$count = MediaHelper::countFiles($tmp->path);
@@ -316,7 +317,7 @@ class PlgMediaJoomla extends JPlugin
 
 			// Build the array of select options for the folder list
 		//$options[] = JHtml::_('select.option', urldecode($base), 'Joomla Media');
-		$tmp[] = JHtml::_('select.option', "", "/", 'value', 'text', false, ' name="' . self::CONTEXT . '"');
+		$tmp[] = JHtml::_('select.option', "", "/", 'value', 'text', false, ' name="' . self::NAME . '"');
 
 		foreach ($folders as $folder)
 		{
@@ -332,8 +333,8 @@ class PlgMediaJoomla extends JPlugin
 				//sort($options);
 		//}
 
-		$groups[self::CONTEXT] = array(
-			'id' => self::CONTEXT,
+		$groups[self::NAME] = array(
+			'id' => self::NAME,
 			'label' => JText::_('PLG_MEDIA_JOOMLA'),
 			'items' => $tmp
 		);
@@ -345,7 +346,7 @@ class PlgMediaJoomla extends JPlugin
 		JFactory::getLanguage()->load('plg_media_joomla');
 
 		$mediaBase = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
-		$children  = new JFolderTree(JText::_('PLG_MEDIA_JOOMLA'), $mediaBase, self::CONTEXT);
+		$children  = new JFolderTree(JText::_('PLG_MEDIA_JOOMLA'), $mediaBase, self::NAME);
 		$childNodes = $children->getTreeArray();
 		//var_dump($childNodes);die;
 		$tree['children'] = $childNodes;
@@ -357,7 +358,7 @@ class PlgMediaJoomla extends JPlugin
 		$folders = JFolder::folders($directory, '.');
 
 		$children = new JFolderTree($name);
-		$children->setData($name, self::CONTEXT, $relative, $directory);
+		$children->setData($name, self::NAME, $relative, $directory);
 
 		if (count($folders) > 0)
 		{
@@ -397,7 +398,7 @@ class PlgMediaJoomla extends JPlugin
 				$relative	= str_replace($mediaBase, '', $folder);
 				$absolute	= $folder;
 				$path		= explode('/', $relative);
-				$node = (object) array('name' => $name, 'context' => self::CONTEXT, 'subfolders' => '', 'relative' => $relative, 'absolute' => $absolute);
+				$node = (object) array('name' => $name, 'context' => self::NAME, 'subfolders' => '', 'relative' => $relative, 'absolute' => $absolute);
 
 				for ($i = 0, $n = count($path); $i < $n; $i++)
 				{
@@ -424,8 +425,8 @@ class PlgMediaJoomla extends JPlugin
 
 			}
 
-			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_JOOMLA'), 'context' => self::CONTEXT, 'subfolders' => $subFolders, 'relative' => '', 'absolute' => $base);
-			$tree['children'][self::CONTEXT] = $children;
+			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_JOOMLA'), 'context' => self::NAME, 'subfolders' => $subFolders, 'relative' => '', 'absolute' => $base);
+			$tree['children'][self::NAME] = $children;
 
 			return true;
 	}

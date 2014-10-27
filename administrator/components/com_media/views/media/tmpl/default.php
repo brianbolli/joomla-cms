@@ -57,7 +57,7 @@ $input = JFactory::getApplication()->input;
 
 			</div>
 			<div id="collapseFolder" class="collapse">
-
+				<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" class="form-horizontal" method="post"></form>
 			</div>
 		<?php endif;?>
 

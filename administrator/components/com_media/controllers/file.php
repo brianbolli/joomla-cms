@@ -160,7 +160,7 @@ class MediaControllerFile extends JControllerLegacy
 			$response->type = false;
 
 			// Trigger the onMediaUploadFile event.
-			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, $this->folder, &$response));
+			$dispatcher->trigger('onMediaUploadFile', array('com_media.' . $context, &$object_file, $this->folder, &$response));
 
 			if ($response->message)
 			{
@@ -250,20 +250,30 @@ class MediaControllerFile extends JControllerLegacy
 
 		$ret = true;
 
-		var_dump($paths);die;
+		//var_dump($paths);die;
 
 		foreach ($paths as $path)
 		{
-				if ($path !== JFile::makeSafe($path))
+				$pos = strrpos($path, '/');
+				$file = substr($path, $pos, strlen($path));
+
+				if ($file !== JFile::makeSafe($file))
 				{
 						// Filename is not safe
-						$filename = htmlspecialchars($path, ENT_COMPAT, 'UTF-8');
+						$filename = htmlspecialchars($file, ENT_COMPAT, 'UTF-8');
 						JError::raiseWarning(100, JText::sprintf('PLG_MEDIA_JOOMLA_ERROR_UNABLE_TO_DELETE_FILE_WARNFILENAME', substr($filename, strlen(COM_MEDIA_BASE))));
 						continue;
 				}
 
-				$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $path)));
-				$object_file = new JObject(array('filepath' => $fullPath));
+				if ($context !== 'com_media.joomla')
+				{
+					$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $path)));
+					$object_file = new JObject(array('filepath' => $fullPath));
+				}
+				else
+				{
+					$object_file = new JObject(array('filepath' => $path));
+				}
 
 				if (is_file($object_file->filepath))
 				{
@@ -318,7 +328,7 @@ class MediaControllerFile extends JControllerLegacy
 						$response->message = false;
 						$response->type = false;
 
-						$dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, &$response));
+						$dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $folder, &$response));
 
 						if ($response->message)
 						{

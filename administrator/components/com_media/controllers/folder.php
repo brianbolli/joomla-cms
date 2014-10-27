@@ -40,7 +40,7 @@ class MediaControllerFolder extends JControllerLegacy
 		$context = $this->input->get('context', 'joomla', 'string');
 		$folder  = $this->input->get('folder', '', 'path');
 
-		$redirect = 'index.php?option=com_media&context&=' . $context . '&folder=' . $folder;
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
 
 		if ($tmpl == 'component')
 		{
@@ -74,7 +74,7 @@ class MediaControllerFolder extends JControllerLegacy
 
 		foreach ($paths as $path)
 		{
-			$dispatcher->trigger('onMediaDeleteFolder', array($context, $folder, $path, &$response));
+			$dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $folder, $path, &$response));
 			if ($response) {
 				$this->setMessage($response->message, $response->type);
 				$response->message = false;
@@ -102,14 +102,24 @@ class MediaControllerFolder extends JControllerLegacy
 
 		$user  = JFactory::getUser();
 
-		$context     = $this->input->get('contextbase', '');
-		$folder      = $this->input->get('foldername', '');
+		$data = $this->input->post->get('jform', array(), 'array');
+
+		$folder = $this->input->get('folder');
+		$folderName = $this->input->get('foldername', '');
 		$folderCheck = (string) $this->input->get('foldername', null, 'raw');
-		$parent      = $this->input->get('folderbase', '', 'path');
+		$context = $this->input->get('context', 'joomla', 'string');
 
-		$this->setRedirect('index.php?option=com_media&context=' . $context . '&folder=' . $parent . '&tmpl=' . $this->input->get('tmpl', 'index'));
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
 
-		if (strlen($folder) > 0)
+		if ($tmpl == 'component')
+		{
+			// We are inside the iframe
+			$redirect .= '&view=mediaList&tmpl=component';
+		}
+
+		$this->setRedirect($redirect);
+
+		if (strlen($data['foldername']) > 0)
 		{
 			if (!$user->authorise('core.create', 'com_media'))
 			{
@@ -126,21 +136,19 @@ class MediaControllerFolder extends JControllerLegacy
 			// Trigger the onMediaFileUpload event.
 			JPluginHelper::importPlugin('media');
 			$dispatcher	= JEventDispatcher::getInstance();
-			$result = $dispatcher->trigger('onMediaCreateFolder', array($context, $folder, $parent, &$response));
+			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $folderName, $folderCheck, &$response));
 
 			if ($result) {
 				$this->input->set('context', $context);
-				$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
+				$this->input->set('folder', ($folder) ? $folder . '/' . $data['foldername'] : $data['foldername']);
 			} else {
 				$this->setMessage($response->message, $response->type);
 			}
-
-			$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
-			$this->input->set('context', $context);
 		}
 		else
 		{
 			// File name is of zero length (null).
+
 			$this->setMessage(JText::_('COM_MEDIA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME'), 'Warning');
 
 			return false;
@@ -151,10 +159,5 @@ class MediaControllerFolder extends JControllerLegacy
 		}
 
 		return true;
-	}
-
-	public function form()
-	{
-
 	}
 }

@@ -40,14 +40,12 @@ var MediaManager = this.MediaManager = {
 
 	onloadframe: function()
 	{
-		console.log('MEDIA MANAGER: ON LOAD FRAME');
 		// Update the frame url
 		this.frameurl = this.frame.location.href;
-		console.log(this.frameurl);
+
 		var context = this.getContext();
 		var folder = this.getFolder();
-		console.log('context: ' + context);
-		console.log('folder: ' + folder);
+
 		if (folder) {
 			this.updatepaths.each(function(path, el){ el.value =folder; });
 			this.folderpath.value = basepath+'/'+folder;
@@ -60,30 +58,38 @@ var MediaManager = this.MediaManager = {
 		this.updateMediaFileForm(context, folder);
 		this.updateMediaFolderForm(context, folder);
 
-		return true;
-
 		$('#' + viewstyle).addClass('active');
 
-		a = this._getUriObject($('#uploadForm').attr('action'));
-		q = this._getQueryObject(a.query);
-		q['folder'] = folder;
-		q['context'] = context;
-		var query = [];
+		var form_id = '#uploadForm';
+		var action = $(form_id).attr('action');
 
-				for (var k in q) {
-						var v = q[k];
-						if (q.hasOwnProperty(k) && v !== null) {
-								query.push(k+'='+v);
-						}
-				}
-
-		a.query = query.join('&');
-
-		if (a.port) {
-			$('#uploadForm').attr('action', a.scheme+'://'+a.domain+':'+a.port+a.path+'?'+a.query);
-		} else {
-			$('#uploadForm').attr('action', a.scheme+'://'+a.domain+a.path+'?'+a.query);
+		if (typeof action === "undefined")
+		{
+			form_id = '#folderForm';
+			action = $(form_id).attr('action');
 		}
+
+			a = this._getUriObject(action);
+			q = this._getQueryObject(a.query);
+			q['folder'] = folder;
+			q['context'] = context;
+			var query = [];
+
+					for (var k in q) {
+							var v = q[k];
+							if (q.hasOwnProperty(k) && v !== null) {
+									query.push(k+'='+v);
+							}
+					}
+
+			a.query = query.join('&');
+
+			if (a.port) {
+				$('#uploadForm').attr('action', a.scheme+'://'+a.domain+':'+a.port+a.path+'?'+a.query);
+			} else {
+				$('#uploadForm').attr('action', a.scheme+'://'+a.domain+a.path+'?'+a.query);
+			}
+		//}
 	},
 
 	updateMediaFileForm: function(context, folder) {
@@ -125,8 +131,7 @@ var MediaManager = this.MediaManager = {
 		var args	= this.parseQuery(url);
 
 		if (args['folder'] == "undefined") {
-			//args['folder'] = "";
-			args['folder'] = document.getElementById('folder').value;
+			args['folder'] = "";
 		}
 
 		return args['folder'];
@@ -261,11 +266,11 @@ var MediaManager = this.MediaManager = {
 })(jQuery);
 
 jQuery(function(){
+	document.getElementById('folderframe').onload = function() { MediaManager.initializeFolderTree();	};
+
 	// Added to populate data on iframe load
 	MediaManager.initialize();
 	MediaManager.trace = 'start';
 	document.updateUploader = function() { MediaManager.onloadframe(); };
-	MediaManager.onloadframe();
-
-	document.getElementById('folderframe').onload = function() { MediaManager.initializeFolderTree();	};
+	//MediaManager.onloadframe();
 });

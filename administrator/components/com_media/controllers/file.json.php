@@ -151,7 +151,7 @@ class MediaControllerFile extends JControllerLegacy
 			$response->type = false;
 
 			// Trigger the onMediaUploadFile event.
-			$dispatcher->trigger('onMediaUploadFile', array($context, &$object_file, $this->folder, &$response));
+			$dispatcher->trigger('onMediaUploadFile', array('com_media.' . $context, &$object_file, $this->folder, &$response));
 
 			if ($response->message)
 			{
@@ -208,7 +208,7 @@ class MediaControllerFile extends JControllerLegacy
 
 				$dispatcher = JDispatcher::getInstance();
 				JPluginHelper::importPlugin('media');
-				$results = $dispatcher->trigger('onMediaPrepareFileForm', array($context, &$form, &$response));
+				$results = $dispatcher->trigger('onMediaPrepareFileForm', array('com_media.' . $context, &$form, &$response));
 
 				// Check for errors encountered while preparing the form.
 				if (count($results) && in_array(false, $results, true))

@@ -32,7 +32,7 @@ class MediaModelList extends JModelLegacy
 			$this->setState('folder', $folder);
 
 			$context = $input->get('context', 'joomla', 'string');
-			$this->setState('context', $context);
+			$this->setState('context', str_replace('com_media.', '', $context));
 
 			$parent = str_replace(DIRECTORY_SEPARATOR, "/", dirname($folder));
 			$parent = ($parent == '.') ? null : $parent;
@@ -94,7 +94,7 @@ class MediaModelList extends JModelLegacy
 
 		$dispatcher = JDispatcher::getInstance();
 		JPluginHelper::importPlugin('media');
-		$dispatcher->trigger('onMediaGetList', array(&$list, $context, $current, &$response));
+		$dispatcher->trigger('onMediaGetList', array('com_media.' . $context, &$list, $current, &$response));
 
 		return $list;
 	}

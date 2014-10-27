@@ -112,6 +112,7 @@ class MediaModelManager extends JModelLegacy
 
 	function getForm() {
 		$context = $this->getState('context');
+		$folder = $this->getState('folder');
 
 		$response = new stdClass();
 		$response->message = false;
@@ -124,7 +125,7 @@ class MediaModelManager extends JModelLegacy
 		try
 		{
 			$form = JForm::getInstance('com_media.uploadmedia', 'uploadmedia', array('control' => 'jform', 'load_data' => false));
-			$data = array();
+			$data = array('folderpath' => $folder);
 
 			$dispatcher = JDispatcher::getInstance();
 			JPluginHelper::importPlugin('media');

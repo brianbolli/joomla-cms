@@ -52,13 +52,14 @@ class MediaControllerFolder extends JControllerLegacy
 			$form = JForm::getInstance('com_media.uploadfolder', 'uploadfolder', array('control' => 'jform', 'load_data' => false));
 
 			$data = array(
-					'folderbase' => $this->input->get('foldername', ''),
-					'contextbase' => $this->input->get('contextbase', '')
+					'folderpath' => $folder,
+					'folderbase' => $folder,
+					'contextbase' => $context
 			);
 
 			$dispatcher = JDispatcher::getInstance();
 			JPluginHelper::importPlugin('media');
-			$results = $dispatcher->trigger('onMediaPrepareFolderForm', array($context, &$form, &$response));
+			$results = $dispatcher->trigger('onMediaPrepareFolderForm', array('com_media.' . $context, &$form, &$response));
 
 			// Check for errors encountered while preparing the form.
 			if (count($results) && in_array(false, $results, true))
