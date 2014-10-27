@@ -104,12 +104,13 @@ class MediaControllerFolder extends JControllerLegacy
 
 		$data = $this->input->post->get('jform', array(), 'array');
 
-		$folder = $this->input->get('folder');
-		$folderName = $this->input->get('foldername', '');
-		$folderCheck = (string) $this->input->get('foldername', null, 'raw');
+		// Get some data from the request
+		$tmpl    = $this->input->get('tmpl');
 		$context = $this->input->get('context', 'joomla', 'string');
 
-		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
+		$folderCheck = (string) $data['foldername'];
+
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $data['folderpath'];
 
 		if ($tmpl == 'component')
 		{
@@ -136,7 +137,7 @@ class MediaControllerFolder extends JControllerLegacy
 			// Trigger the onMediaFileUpload event.
 			JPluginHelper::importPlugin('media');
 			$dispatcher	= JEventDispatcher::getInstance();
-			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $folderName, $folderCheck, &$response));
+			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $data['foldername'], $folderCheck, &$response));
 
 			if ($result) {
 				$this->input->set('context', $context);

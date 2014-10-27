@@ -90,14 +90,16 @@ class PlgMediaAzure extends JPlugin
 
 	}
 
-	public function onMediaGetFolderList(&$groups, $base, &$response) {
+	public function onMediaGetFolderList(&$groups, $base, &$response, $images = false) {
 
 		$tmp = array();
+
 		// Get some paths from the request
 		if (empty($base))
 		{
 				$base = COM_MEDIA_BASE;
 		}
+
 		//corrections for windows paths
 		$base = str_replace(DIRECTORY_SEPARATOR, '/', $base);
 		$com_media_base_uni = str_replace(DIRECTORY_SEPARATOR, '/', COM_MEDIA_BASE);
@@ -120,15 +122,18 @@ class PlgMediaAzure extends JPlugin
 			$account_name = $this->params->get('azure_default_name');
 
 			foreach ($containers as $container) {
-				$value = $container['name'];
-				$tmp[] = JHtml::_('select.option', $value, $container['name'], 'value', 'text', false);
+				if ($images === true)
+				{
+					if ($container['public_access'] == 'blob' || $container['public_access'] == 'container' && !is_null($container['public_access']))
+					{
+						$value = $container['name'];
+						$tmp[] = JHtml::_('select.option', $value, $container['name'], 'value', 'text', false);
+					}
+				} else {
+					$value = $container['name'];
+					$tmp[] = JHtml::_('select.option', $value, $container['name'], 'value', 'text', false);
+				}
 			}
-
-			// Sort the folder list array
-			//if (is_array($options))
-			//{
-					//sort($options);
-			//}
 		}
 
 
@@ -144,11 +149,11 @@ class PlgMediaAzure extends JPlugin
 
 
 	public function onMediaGetList($context, &$list, $current, &$response) {
-			if (JFactory::getApplication()->input->get('view') == 'imagesList') {
-					$mediaList = false;
-			} else {
-					$mediaList = true;
-			}
+		if (JFactory::getApplication()->input->get('view') == 'imagesList') {
+				$mediaList = false;
+		} else {
+				$mediaList = true;
+		}
 
 		if ($context === self::CONTEXT)
 		{
@@ -163,9 +168,12 @@ class PlgMediaAzure extends JPlugin
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
 							{
-								var el = window.parent.document.getElementById('toolbar-new');
-								var button = el.firstElementChild || elem.firstChild;
-								button.disabled = 0;
+								var el1 = window.parent.document.getElementById('toolbar-new');
+								var button1 = el1.firstElementChild || el1.firstChild;
+								button1.disabled = 0;
+								var el2 = window.parent.document.getElementById('toolbar-upload');
+								var button2 = el2.firstElementChild || el2.firstChild;
+								button2.disabled = 1;
 							});"
 						);
 					}
@@ -173,15 +181,18 @@ class PlgMediaAzure extends JPlugin
 				else
 				{
 					$iterateList = $this->azure->listBlobs($current);
-					$list = $this->buildFileListObjects($iterateList);
+					$list = $this->buildFileListObjects($iterateList, $mediaList);
 					if ($mediaList)
 					{
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
 							{
-								var el = window.parent.document.getElementById('toolbar-new');
-								var button = el.firstElementChild || elem.firstChild;
-								button.disabled = 1;
+								var el1 = window.parent.document.getElementById('toolbar-new');
+								var button1 = el1.firstElementChild || el1.firstChild;
+								button1.disabled = 1;
+								var el2 = window.parent.document.getElementById('toolbar-upload');
+								var button2 = el2.firstElementChild || el2.firstChild;
+								button2.disabled = 0;
 							});"
 						);
 					}
@@ -193,9 +204,12 @@ class PlgMediaAzure extends JPlugin
 				JFactory::getDocument()->addScriptDeclaration("
 					window.addEvent('domready', function()
 					{
-						var el = window.parent.document.getElementById('toolbar-new');
-						var button = el.firstElementChild || elem.firstChild;
-						button.disabled = 0;
+						var el1 = window.parent.document.getElementById('toolbar-new');
+						var button1 = el1.firstElementChild || el1.firstChild;
+						button1.disabled = 0;
+						var el2 = window.parent.document.getElementById('toolbar-upload');
+						var button2 = el2.firstElementChild || el2.firstChild;
+						button2.disabled = 0;
 					});"
 				);
 			}
@@ -213,7 +227,8 @@ class PlgMediaAzure extends JPlugin
 
 			$children = array();
 			$tmp = &$children;
-			foreach ($containers as $container) {
+			foreach ($containers as $container)
+			{
 
 					$folder		= $container['name'];
 					$name		= $container['name'];
@@ -226,6 +241,25 @@ class PlgMediaAzure extends JPlugin
 
 			$children['data'] = (object) array('name' => JText::_('PLG_MEDIA_AZURE'), 'context' => self::NAME, 'relative' => '', 'absolute' => $baseUrl);
 			array_push($tree['children'], $children);
+		}
+
+		return true;
+	}
+
+	public function onMediaContentImageForm($context, &$form, &$response)
+	{
+		if (!($form instanceof JForm))
+		{
+			return false;
+		}
+
+		if ($context === self::CONTEXT)
+		{
+			if ((int) $this->params->get('azure_cdn_enabled', 0) && (int) $this->params->get('azure_cdn_query_string', 0))
+			{
+				JForm::addFormPath(JPATH_ROOT . '/plugins/media/azure/forms');
+				$form->load('contentimage', false);
+			}
 		}
 
 		return true;
@@ -263,6 +297,24 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
+	private function processBlobUrl($url)
+	{
+		if ((int) $this->params->get('azure_cdn_enabled', 0, 'int') === 1) {
+			$cdn_url = $this->params->get('azure_cdn_url');
+			$name = $this->params->get('azure_account_name');
+			$endpoint = $this->params->get('azure_default_endpoint');
+			$azure_url = $this->buildAzureStorageUrl($endpoint, $name);
+			return str_replace($azure_url, $cdn_url, $url);
+		} else {
+			return $url;
+		}
+	}
+
+
+	private function buildAzureStorageUrl($endpoint, $name) {
+		return $endpoint . '://' . $name . '.blob.core.windows.net/';
+	}
+
 	private function buildFolderListObjects($objects) {
 		$folders = array();
 
@@ -281,100 +333,103 @@ class PlgMediaAzure extends JPlugin
 		return array('folders' => $folders, 'docs' => array(), 'images' => array());
 	}
 
-	private function buildFileListObjects($objects) {
-			$docs = array();
-			$images = array();
+	private function buildFileListObjects($objects, $images = false)
+	{
+		$docs = array();
+		$images = array();
 
-			if ($objects)
+		if ($objects)
+		{
+			foreach ($objects as $item)
 			{
-				foreach ($objects as $item)
+				$parts = explode("/", $item['content_type']);
+				if ($parts[0] == 'image')
 				{
+					$tmp = new JObject;
+					$tmp->name = $item['name'];
+					$tmp->title = $item['name'];
+					$tmp->path = $item['url'];
+					$tmp->context = self::NAME;
+					$tmp->path_relative = false;
+					$tmp->path_absolute = $this->processBlobUrl($item['url']);
+					$tmp->size = $item['size'];
+					$parts = explode('/', $item['content_type']);
 
-						$tmp = new JObject;
-						$tmp->name = $item['name'];
-						$tmp->title = $item['name'];
-						$tmp->path = $item['url'];
-						$tmp->context = self::NAME;
-						$tmp->path_relative = false;
-						$tmp->path_absolute = $item['url'];
-						$tmp->size = $item['size'];
-						$parts = explode('/', $item['content_type']);
+					if ($parts[0] == 'image') {
+						$ext = $parts[1];
+					} else {
+						$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
+					}
 
-						if ($parts[0] == 'image') {
-							$ext = $parts[1];
-						} else {
-							$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
-						}
+					switch ($ext)
+					{
+						// Image
+						case 'jpg':
+						case 'png':
+						case 'gif':
+						case 'xcf':
+						case 'odg':
+						case 'bmp':
+						case 'jpeg':
+						case 'ico':
+							$info = @getimagesize($tmp->path_absolute);
+							$tmp->width		= @$info[0];
+							$tmp->height	= @$info[1];
+							$tmp->type		= @$info[2];
+							$tmp->mime		= @$info['mime'];
 
-						switch ($ext)
-						{
-								// Image
-								case 'jpg':
-								case 'png':
-								case 'gif':
-								case 'xcf':
-								case 'odg':
-								case 'bmp':
-								case 'jpeg':
-								case 'ico':
-										$info = @getimagesize($tmp->path_absolute);
-										$tmp->width		= @$info[0];
-										$tmp->height	= @$info[1];
-										$tmp->type		= @$info[2];
-										$tmp->mime		= @$info['mime'];
+							if (($info[0] > 60) || ($info[1] > 60))
+							{
+									$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
+									$tmp->width_60 = $dimensions[0];
+									$tmp->height_60 = $dimensions[1];
+							}
+							else
+							{
+									$tmp->width_60 = $tmp->width;
+									$tmp->height_60 = $tmp->height;
+							}
 
-										if (($info[0] > 60) || ($info[1] > 60))
-										{
-												$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
-												$tmp->width_60 = $dimensions[0];
-												$tmp->height_60 = $dimensions[1];
-										}
-										else
-										{
-												$tmp->width_60 = $tmp->width;
-												$tmp->height_60 = $tmp->height;
-										}
+							if (($info[0] > 16) || ($info[1] > 16))
+							{
+									$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
+									$tmp->width_16 = $dimensions[0];
+									$tmp->height_16 = $dimensions[1];
+							}
+							else
+							{
+									$tmp->width_16 = $tmp->width;
+									$tmp->height_16 = $tmp->height;
+							}
 
-										if (($info[0] > 16) || ($info[1] > 16))
-										{
-												$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
-												$tmp->width_16 = $dimensions[0];
-												$tmp->height_16 = $dimensions[1];
-										}
-										else
-										{
-												$tmp->width_16 = $tmp->width;
-												$tmp->height_16 = $tmp->height;
-										}
+							$images[] = $tmp;
+							break;
 
-										$images[] = $tmp;
-										break;
-
-										// Non-image document
-								default:
-										$tmp->icon_32 = "media/mime-icon-32/".$ext.".png";
-										$tmp->icon_16 = "media/mime-icon-16/".$ext.".png";
-										$docs[] = $tmp;
-										break;
-						}
+							// Non-image document
+						default:
+							$tmp->icon_32 = "media/mime-icon-32/".$ext.".png";
+							$tmp->icon_16 = "media/mime-icon-16/".$ext.".png";
+							$docs[] = $tmp;
+						break;
+					}
 				}
 			}
-			return array('folders' => array(), 'docs' => $docs, 'images' => $images);
-
+		}
+		return array('folders' => array(), 'docs' => $docs, 'images' => $images);
 	}
 
 	private function getApplicationContentTypeExtension($type, $name) {
-			switch ($type)
-			{
-					case 'x-zip' :
-						return 'zip';
-					break;
-					case 'plain' :
-						return 'js';
-					break;
-					default :
-						return 'doc';
-			}
+		switch ($type)
+		{
+			case 'x-zip' :
+				return 'zip';
+			break;
+			case 'plain' :
+				return 'js';
+			break;
+			default :
+				return 'doc';
+		}
 	}
 
 }

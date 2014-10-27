@@ -42,7 +42,9 @@ class MediaViewImages extends JViewLegacy
 		$this->session = JFactory::getSession();
 		$this->config = $config;
 		$this->state = $this->get('state');
-		$this->folderList = $this->get('folderList');
+
+		$model = $this->getModel();
+		$this->folderList = $model->getFolderList(COM_MEDIA_BASE, true);
 		$this->require_ftp = $ftp;
 
 		parent::display($tpl);

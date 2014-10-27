@@ -54,7 +54,7 @@ $input = JFactory::getApplication()->input;
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
 			<div id="collapseUpload" class="collapse">
-
+				<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $this->session->getName().'='.$this->session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadForm" class="form-inline" name="uploadForm" method="post" enctype="multipart/form-data"></form>
 			</div>
 			<div id="collapseFolder" class="collapse">
 				<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" class="form-horizontal" method="post"></form>
@@ -64,7 +64,7 @@ $input = JFactory::getApplication()->input;
 		<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" method="post">
 			<div id="folderview">
 				<div class="view">
-					<iframe class="thumbnail" src="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder;?>" id="folderframe" name="folderframe" width="100%" height="500px" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+					<iframe class="thumbnail" src="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder;?>" id="folderframe" name="folderframe" width="100%" marginwidth="0" marginheight="0" scrolling="auto" style="min-height: 500px;"></iframe>
 				</div>
 				<?php echo JHtml::_('form.token'); ?>
 			</div>

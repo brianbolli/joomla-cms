@@ -90,11 +90,15 @@ class GetBlob extends JAzureQuery
 	 *
 	 * @see JAzureQuery::processResults()
 	 */
-	protected function processResults($results) {
+	protected function processResults($results)
+	{
 		//return $results;
-		if (empty($this->options[1])) {
+		if (empty($this->options[1]))
+		{
 			$properties = new JBlobProperties();
-		} else {
+		}
+		else
+		{
 			$properties = new JBlobProperties($this->options[1], $this->url, $results->getProperties());
 		}
 		return $properties;

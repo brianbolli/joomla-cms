@@ -44,15 +44,6 @@
 				</field>
 
 				<field
-					name="azure_cdn_url"
-					type="url"
-					label="PLG_MEDIA_AZURE_FIELD_CDN_URL_LABEL"
-					description="PLG_MEDIA_AZURE_FIELD_CDN_URL_DESC"
-					class="env_checkbox"
-					default="0"
-				/>
-
-				<field
 					name="azure_account_name"
 					type="text"
 					label="PLG_MEDIA_AZURE_FIELD_ACCOUNT_NAME_LABEL"
@@ -69,6 +60,46 @@
 					size="100"
 					class="disable-me"
 				/>
+
+				<field
+					name="azure_cdn_enabled"
+					type="radio"
+					label="PLG_MEDIA_AZURE_FIELD_CDN_ENABLED_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_CDN_ENABLED_DESC"
+					default="0"
+					class="radio btn-group">
+					<option value="0">Disabled</option>
+					<option value="1">Enabled</option>
+				</field>
+
+				<field
+					name="azure_cdn_url"
+					type="url"
+					label="PLG_MEDIA_AZURE_FIELD_CDN_URL_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_CDN_URL_DESC"
+					class="env_checkbox"
+					default=""
+				/>
+
+				<field
+					name="azure_cdn_https"
+					type="radio"
+					label="PLG_MEDIA_AZURE_FIELD_CDN_HTTPS_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_CDN_HTTPS_DESC"
+					class="radio btn-group">
+					<option value="0">Disabled</option>
+					<option value="1">Enabled</option>
+				</field>
+
+				<field
+					name="azure_cdn_query_string"
+					type="radio"
+					label="PLG_MEDIA_AZURE_FIELD_DEFAULT_ENDPOINT_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_DEFAULT_ENDPOINT_DESC"
+					class="radio btn-group">
+					<option value="0">Disabled</option>
+					<option value="1">Enabled</option>
+				</field>
 
 				<field
 					name="azure_use_environment_variable"

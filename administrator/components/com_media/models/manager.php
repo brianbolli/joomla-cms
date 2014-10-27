@@ -44,7 +44,7 @@ class MediaModelManager extends JModelLegacy
 		return parent::getState($property, $default);
 	}
 
-	function getFolderList($base = null)
+	function getFolderList($base = null, $images = false)
 	{
 		$response = new stdClass();
 		$response->message = false;
@@ -54,7 +54,7 @@ class MediaModelManager extends JModelLegacy
 
 		$dispatcher = JDispatcher::getInstance();
 		JPluginHelper::importPlugin('media');
-		$dispatcher->trigger('onMediaGetFolderlist', array(&$groups, $base, &$response));
+		$dispatcher->trigger('onMediaGetFolderlist', array(&$groups, $base, &$response, $images));
 
 		// Get asset and author id (use integer filter)
 		$input = JFactory::getApplication()->input;
@@ -155,4 +155,5 @@ class MediaModelManager extends JModelLegacy
 
 		return $form;
 	}
+
 }
