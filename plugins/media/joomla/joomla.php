@@ -90,14 +90,9 @@ class PlgMediaJoomla extends JPlugin
 		}
 	}
 
-	public function onMediaDeleteFile($context, $file, &$response) {
-		if ($context === self::CONTEXT) {
-			$ret &= JFile::delete($object_file->filepath);
-		}
-		return true;
-	}
+	public function onMediaCreateFolder($context, $parent, $folder, $data, &$response) {
 
-	public function onMediaCreateFolder($context, $parent, $folder, $folderCheck, &$response) {
+		$folderCheck = $data['foldername'];
 
 		$app = JFactory::getApplication();
 
@@ -112,53 +107,109 @@ class PlgMediaJoomla extends JPlugin
 
 			if (($folderCheck !== null) && ($folder !== $folderCheck))
 			{
-					$app = JFactory::getApplication();
-					$response->message = JText::_('PLG_MEDIA_JOOMLA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME');
-					$response->type = 'Warning';
+				$app = JFactory::getApplication();
+				$response->message = JText::_('PLG_MEDIA_JOOMLA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME');
+				$response->type = 'Warning';
 
-					return false;
+				return false;
 			}
 
 			$path = JPath::clean(COM_MEDIA_BASE . '/' . $parent . '/' . $folder);
 
 			if (!is_dir($path) && !is_file($path))
 			{
-					// Trigger the onContentBeforeSave event.
-					$object_file = new JObject(array('filepath' => $path));
-					JPluginHelper::importPlugin('content');
-					$dispatcher	= JEventDispatcher::getInstance();
-					$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.folder', &$object_file, true));
+				// Trigger the onContentBeforeSave event.
+				$object_file = new JObject(array('filepath' => $path));
+				JPluginHelper::importPlugin('content');
+				$dispatcher	= JEventDispatcher::getInstance();
+				$result = $dispatcher->trigger('onContentBeforeSave', array('com_media.folder', &$object_file, true));
 
-					if (in_array(false, $result, true))
-					{
-							// There are some errors in the plugins
-							$response->message = JText::plural('PLG_MEDIA_JOOMLA_ERROR_BEFORE_SAVE', count($errors = $object_file->getErrors()), implode('<br />', $errors));
-							$response->type = 'Warning';
+				if (in_array(false, $result, true))
+				{
 
-							return false;
-					}
+					// There are some errors in the plugins
+					$response->message = JText::plural('PLG_MEDIA_JOOMLA_ERROR_BEFORE_SAVE', count($errors = $object_file->getErrors()), implode('<br />', $errors));
+					$response->type = 'Warning';
 
-					if (JFolder::create($object_file->filepath))
-					{
-							$data = "<html>\n<body bgcolor=\"#FFFFFF\">\n</body>\n</html>";
-							JFile::write($object_file->filepath . "/index.html", $data);
+					return false;
+				}
 
-							// Trigger the onContentAfterSave event.
-							$dispatcher->trigger('onContentAfterSave', array('com_media.folder', &$object_file, true));
-							$response->message = JText::sprintf('PLG_MEDIA_JOOMLA_CREATE_COMPLETE', JText::_('PLG_MEDIA_JOOMLA'), $folder);
-							$response->type = 'Message';
-					}
+				if (JFolder::create($object_file->filepath))
+				{
+					$data = "<html>\n<body bgcolor=\"#FFFFFF\">\n</body>\n</html>";
+					JFile::write($object_file->filepath . "/index.html", $data);
+
+					// Trigger the onContentAfterSave event.
+					$dispatcher->trigger('onContentAfterSave', array('com_media.folder', &$object_file, true));
+					$response->message = JText::sprintf('PLG_MEDIA_JOOMLA_CREATE_COMPLETE', JText::_('PLG_MEDIA_JOOMLA'), $folder);
+					$response->type = 'Message';
+				}
 			}
 		}
 
 		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folder, $path, &$response) {
+
+	public function onMediaDeleteFile($context, $object_file, $folder, &$response) {
+
 		if ($context === self::CONTEXT)
 		{
-			if (!JFolder::delete($path)) {
 
+			$pos = strrpos($object_file->filepath, DIRECTORY_SEPARATOR);
+			$filename = substr($object_file->filepath, $pos + 1, strlen($object_file->filepath));
+			if ($filename !== JFile::makeSafe($filename))
+			{
+				// filename is not safe
+				$filename = htmlspecialchars($path, ENT_COMPAT, 'UTF-8');
+				$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FILE_WARNFILENAME', substr($filename, strlen(COM_MEDIA_BASE)));
+				$response->type = 'Warning';
+				return false;
+			}
+
+			if (!JFile::delete($object_file->filepath)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public function onMediaDeleteFolder($context, $folderpath, $folder, &$response) {
+
+		if ($context === self::CONTEXT)
+		{
+			$deletePath = COM_MEDIA_BASE . '/';
+			if (!empty($folderpath)) {
+				$deletePath .= $folderpath . '/';
+			}
+			$deletePath .=  $folder;
+
+			if (is_dir($deletePath))
+			{
+				$contents = JFolder::files($deletePath, '.', true, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));
+
+				if (empty($contents))
+				{
+					if (!JFolder::delete($deletePath))
+					{
+						$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+						$response->type = 'Warning';
+						return false;
+					}
+				}
+				else
+				{
+					$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+					$response->type = 'Warning';
+					return false;
+				}
+			}
+			else
+			{
+				$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+				$response->type = 'Warning';
+				return false;
 			}
 		}
 

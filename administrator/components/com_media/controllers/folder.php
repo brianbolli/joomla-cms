@@ -38,9 +38,9 @@ class MediaControllerFolder extends JControllerLegacy
 		$tmpl    = $this->input->get('tmpl');
 		$paths   = $this->input->get('rm', array(), 'array');
 		$context = $this->input->get('context', 'joomla', 'string');
-		$folder  = $this->input->get('folder', '', 'path');
+		$folderbase  = $this->input->get('folder', '', 'path');
 
-		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folderbase;
 
 		if ($tmpl == 'component')
 		{
@@ -72,18 +72,33 @@ class MediaControllerFolder extends JControllerLegacy
 		JPluginHelper::importPlugin('media');
 		$dispatcher	= JEventDispatcher::getInstance();
 
-		foreach ($paths as $path)
+		foreach ($paths as $folder)
 		{
-			$dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $folder, $path, &$response));
-			if ($response) {
-				$this->setMessage($response->message, $response->type);
-				$response->message = false;
-				$response->type = false;
+			// Trigger the onContentBeforeDelete event.
+			$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.folder', &$object_file));
+
+			if (in_array(false, $result, true))
+			{
+				// There are some errors in the plugins
+				$this->setMessage(JText::plural('COM_MEDIA_ERROR_BEFORE_DELETE', count($errors = $object_file->getErrors()), implode('<br />', $errors)), 'Warning');
+				return false;
 			}
+
+			$result = $dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $folderbase, $folder, &$response));
+
+			if (in_array(false, $result, true))
+			{
+				$this->setMessage($response->message, $response->type);
+				return false;
+			}
+
+			// Trigger the onContentAfterDelete event.
+			$dispatcher->trigger('onContentAfterDelete', array('com_media.folder', &$object_file));
+			$this->setMessage(JText::sprintf('COM_MEDIA_DELETE_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
 		}
 
 		$this->input->set('context', $context);
-		$this->input->set('folder', ($parent) ? $parent . '/' . $folder : $folder);
+		$this->input->set('folder', ($parent) ? $parent . '/' . $folderbase : $folderbase);
 
 		return true;
 	}
@@ -107,8 +122,6 @@ class MediaControllerFolder extends JControllerLegacy
 		// Get some data from the request
 		$tmpl    = $this->input->get('tmpl');
 		$context = $this->input->get('context', 'joomla', 'string');
-
-		$folderCheck = (string) $data['foldername'];
 
 		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $data['folderpath'];
 
@@ -137,7 +150,7 @@ class MediaControllerFolder extends JControllerLegacy
 			// Trigger the onMediaFileUpload event.
 			JPluginHelper::importPlugin('media');
 			$dispatcher	= JEventDispatcher::getInstance();
-			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $data['foldername'], $folderCheck, &$response));
+			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $data['foldername'], $data, &$response));
 
 			if ($result) {
 				$this->input->set('context', $context);

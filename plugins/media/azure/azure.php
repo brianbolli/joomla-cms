@@ -66,28 +66,44 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFile($context, &$paths, &$response) {
+	public function onMediaDeleteFile($context, $object_file, $folder, &$response) {
+		if ($context === self::CONTEXT)
+		{
 
-		if ($context === self::CONTEXT) {
-			$this->azure->deleteBlob(strtolower($folder));
+			// Azure blobs use URLs, therefor no need to compensate for directory seperator specific syntax
+			$pos = strrpos($object_file->filepath, '/');
+			$blob = substr($object_file->filepath, $pos + 1, strlen($object_file->filepath));
+			$this->azure->deleteBlob(strtolower($folder), $blob);
 		}
-
+		return true;
 	}
 
-	public function onMediaCreateFolder($context, $parent, $folder, $folderCheck, &$response) {
+	public function onMediaCreateFolder($context, $parent, $folder, $data, &$response) {
 
 		if ($context === self::CONTEXT) {
-			$result = $this->azure->createContainer(strtolower($folder));
+			$result = $this->azure->createContainer(strtolower($folder), $data['access_type']);
 		}
-
+		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folder, $path, &$response) {
-
+	public function onMediaDeleteFolder($context, $folderpath, $folder, &$response) {
 		if ($context === self::CONTEXT) {
-			$this->azure->deleteContainer(strtolower($path));
-		}
 
+			// confirm Azure container is empty by retrieving blobs
+			$blobs = $this->azure->listBlobs($folder);
+
+			if (empty($blobs))
+			{
+				$this->azure->deleteContainer(strtolower($folder));
+			}
+			else
+			{
+				$response->message = JText::_('PLG_MEDIA_AZURE_ERROR_CANNOT_DELETE_CONTAINER_WITH_BLOBS');
+				$response->type = 'Warning';
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public function onMediaGetFolderList(&$groups, $base, &$response, $images = false) {
@@ -112,7 +128,8 @@ class PlgMediaAzure extends JPlugin
 		$document->setTitle(JText::_('COM_MEDIA_INSERT_IMAGE'));
 		$response = new stdClass();
 		$response->message = false;
-		if ($this->params->get('azure_enabled', 0)) {
+		if ((int) $this->params->get('azure_enabled', 0))
+		{
 			$data = new stdClass();
 			$data->name = 'Azure';
 			$data->relative = '';
@@ -121,7 +138,8 @@ class PlgMediaAzure extends JPlugin
 			$containers = $this->azure->listContainers();
 			$account_name = $this->params->get('azure_default_name');
 
-			foreach ($containers as $container) {
+			foreach ($containers as $container)
+			{
 				if ($images === true)
 				{
 					if ($container['public_access'] == 'blob' || $container['public_access'] == 'container' && !is_null($container['public_access']))
@@ -149,10 +167,11 @@ class PlgMediaAzure extends JPlugin
 
 
 	public function onMediaGetList($context, &$list, $current, &$response) {
-		if (JFactory::getApplication()->input->get('view') == 'imagesList') {
-				$mediaList = false;
+		if (JFactory::getApplication()->input->get('view') == 'imagesList')
+		{
+			$imageList = true;
 		} else {
-				$mediaList = true;
+			$imageList = false;
 		}
 
 		if ($context === self::CONTEXT)
@@ -163,7 +182,7 @@ class PlgMediaAzure extends JPlugin
 				{
 					$iterateList = $this->azure->listContainers();
 					$list = $this->buildFolderListObjects($iterateList);
-					if ($mediaList)
+					if (!$imageList)
 					{
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
@@ -181,8 +200,8 @@ class PlgMediaAzure extends JPlugin
 				else
 				{
 					$iterateList = $this->azure->listBlobs($current);
-					$list = $this->buildFileListObjects($iterateList, $mediaList);
-					if ($mediaList)
+					$list = $this->buildFileListObjects($iterateList, $imageList);
+					if (!$imageList)
 					{
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
@@ -199,7 +218,7 @@ class PlgMediaAzure extends JPlugin
 				}
 			}
 		} else {
-			if ($mediaList)
+			if (!$imageList)
 			{
 				JFactory::getDocument()->addScriptDeclaration("
 					window.addEvent('domready', function()
@@ -333,7 +352,7 @@ class PlgMediaAzure extends JPlugin
 		return array('folders' => $folders, 'docs' => array(), 'images' => array());
 	}
 
-	private function buildFileListObjects($objects, $images = false)
+	private function buildFileListObjects($objects, $imageList = false)
 	{
 		$docs = array();
 		$images = array();
@@ -343,75 +362,76 @@ class PlgMediaAzure extends JPlugin
 			foreach ($objects as $item)
 			{
 				$parts = explode("/", $item['content_type']);
-				if ($parts[0] == 'image')
+
+				$tmp = new JObject;
+				$tmp->name = $item['name'];
+				$tmp->title = $item['name'];
+				$tmp->path = $item['url'];
+				$tmp->context = self::NAME;
+				$tmp->path_relative = false;
+				$tmp->path_absolute = $this->processBlobUrl($item['url']);
+				$tmp->size = $item['size'];
+				$parts = explode('/', $item['content_type']);
+
+				if ($parts[0] == 'image') {
+					$ext = $parts[1];
+				} else {
+					$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
+				}
+
+				switch ($ext)
 				{
-					$tmp = new JObject;
-					$tmp->name = $item['name'];
-					$tmp->title = $item['name'];
-					$tmp->path = $item['url'];
-					$tmp->context = self::NAME;
-					$tmp->path_relative = false;
-					$tmp->path_absolute = $this->processBlobUrl($item['url']);
-					$tmp->size = $item['size'];
-					$parts = explode('/', $item['content_type']);
+					// Image
+					case 'jpg':
+					case 'png':
+					case 'gif':
+					case 'xcf':
+					case 'odg':
+					case 'bmp':
+					case 'jpeg':
+					case 'ico':
+						$info = @getimagesize($tmp->path_absolute);
+						$tmp->width		= @$info[0];
+						$tmp->height	= @$info[1];
+						$tmp->type		= @$info[2];
+						$tmp->mime		= @$info['mime'];
 
-					if ($parts[0] == 'image') {
-						$ext = $parts[1];
-					} else {
-						$ext = $this->getApplicationContentTypeExtension($parts[1], $tmp->name);
-					}
+						if (($info[0] > 60) || ($info[1] > 60))
+						{
+								$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
+								$tmp->width_60 = $dimensions[0];
+								$tmp->height_60 = $dimensions[1];
+						}
+						else
+						{
+								$tmp->width_60 = $tmp->width;
+								$tmp->height_60 = $tmp->height;
+						}
 
-					switch ($ext)
-					{
-						// Image
-						case 'jpg':
-						case 'png':
-						case 'gif':
-						case 'xcf':
-						case 'odg':
-						case 'bmp':
-						case 'jpeg':
-						case 'ico':
-							$info = @getimagesize($tmp->path_absolute);
-							$tmp->width		= @$info[0];
-							$tmp->height	= @$info[1];
-							$tmp->type		= @$info[2];
-							$tmp->mime		= @$info['mime'];
+						if (($info[0] > 16) || ($info[1] > 16))
+						{
+								$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
+								$tmp->width_16 = $dimensions[0];
+								$tmp->height_16 = $dimensions[1];
+						}
+						else
+						{
+								$tmp->width_16 = $tmp->width;
+								$tmp->height_16 = $tmp->height;
+						}
 
-							if (($info[0] > 60) || ($info[1] > 60))
+						$images[] = $tmp;
+						break;
+
+						// Non-image document
+					default:
+						if (!$imageList)
 							{
-									$dimensions = MediaHelper::imageResize($info[0], $info[1], 60);
-									$tmp->width_60 = $dimensions[0];
-									$tmp->height_60 = $dimensions[1];
-							}
-							else
-							{
-									$tmp->width_60 = $tmp->width;
-									$tmp->height_60 = $tmp->height;
-							}
-
-							if (($info[0] > 16) || ($info[1] > 16))
-							{
-									$dimensions = MediaHelper::imageResize($info[0], $info[1], 16);
-									$tmp->width_16 = $dimensions[0];
-									$tmp->height_16 = $dimensions[1];
-							}
-							else
-							{
-									$tmp->width_16 = $tmp->width;
-									$tmp->height_16 = $tmp->height;
-							}
-
-							$images[] = $tmp;
-							break;
-
-							// Non-image document
-						default:
 							$tmp->icon_32 = "media/mime-icon-32/".$ext.".png";
 							$tmp->icon_16 = "media/mime-icon-16/".$ext.".png";
 							$docs[] = $tmp;
-						break;
-					}
+						}
+					break;
 				}
 			}
 		}

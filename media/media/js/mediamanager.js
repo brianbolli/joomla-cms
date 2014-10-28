@@ -69,27 +69,26 @@ var MediaManager = this.MediaManager = {
 			action = $(form_id).attr('action');
 		}
 
-			a = this._getUriObject(action);
-			q = this._getQueryObject(a.query);
-			q['folder'] = folder;
-			q['context'] = context;
-			var query = [];
+		a = this._getUriObject(action);
+		q = this._getQueryObject(a.query);
+		q['folder'] = folder;
+		q['context'] = context;
+		var query = [];
 
-					for (var k in q) {
-							var v = q[k];
-							if (q.hasOwnProperty(k) && v !== null) {
-									query.push(k+'='+v);
-							}
-					}
-
-			a.query = query.join('&');
-
-			if (a.port) {
-				$('#uploadForm').attr('action', a.scheme+'://'+a.domain+':'+a.port+a.path+'?'+a.query);
-			} else {
-				$('#uploadForm').attr('action', a.scheme+'://'+a.domain+a.path+'?'+a.query);
+		for (var k in q) {
+			var v = q[k];
+			if (q.hasOwnProperty(k) && v !== null) {
+				query.push(k+'='+v);
 			}
-		//}
+		}
+
+		a.query = query.join('&');
+
+		if (a.port) {
+			$('#uploadForm').attr('action', a.scheme+'://'+a.domain+':'+a.port+a.path+'?'+a.query);
+		} else {
+			$('#uploadForm').attr('action', a.scheme+'://'+a.domain+a.path+'?'+a.query);
+		}
 	},
 
 	updateMediaFileForm: function(context, folder) {
