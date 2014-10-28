@@ -2,7 +2,7 @@
 // no direct access
 defined('_JEXEC') or die;
 
-jimport('azure.windowsazure.windowsazure');
+require_once 'sdk/WindowsAzure/WindowsAzure.php';
 
 use WindowsAzure\Blob\Models\PublicAccessType;
 use WindowsAzure\Common\ServicesBuilder;

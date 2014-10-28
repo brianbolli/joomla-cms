@@ -13,6 +13,6 @@ return array(
     $vendorDir . '/pear-pear.php.net/Mail_Mime',
     $vendorDir . '/pear-pear.php.net/Mail_mimeDecode',
     $vendorDir . '/pear-pear.php.net/PEAR',
-    $vendorDir . '/pear-pear.php.net/Net_URL2',
     $vendorDir . '/pear-pear.php.net/Archive_Tar',
+    $vendorDir . '/pear-pear.php.net/Net_URL2',
 );
