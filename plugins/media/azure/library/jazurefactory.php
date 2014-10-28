@@ -2,7 +2,7 @@
 // no direct access
 defined('_JEXEC') or die;
 
-require_once 'sdk/WindowsAzure/WindowsAzure.php';
+require_once JPATH_ROOT . '/plugins/media/azure/library/sdk/vendor/autoload.php';
 
 use WindowsAzure\Blob\Models\PublicAccessType;
 use WindowsAzure\Common\ServicesBuilder;
