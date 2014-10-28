@@ -3,6 +3,7 @@
 defined('_JEXEC') or die;
 
 require_once JPATH_ROOT . '/plugins/media/azure/library/sdk/vendor/autoload.php';
+require_once JPATH_ROOT . '/plugins/media/azure/library/sdk/WindowsAzure/WindowsAzure.php';
 
 use WindowsAzure\Blob\Models\PublicAccessType;
 use WindowsAzure\Common\ServicesBuilder;
