@@ -42,5 +42,6 @@ $config = JComponentHelper::getParams('com_media');
 					</div>
 					<?php JFactory::getSession()->set('com_media.return_url', 'index.php?option=com_media'); ?>
 				</div>
+				<?php echo JHtml::_('form.token'); ?>
 			</div>
 		</form>

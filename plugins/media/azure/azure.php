@@ -71,18 +71,21 @@ class PlgMediaAzure extends JPlugin
 
 	public function onMediaUpdateFile($context, $data, $folder, &$response)
 	{
-			var_dump($data);
-
 		if ($context === self::CONTEXT)
 		{
+			$config = JFactory::getConfig();
+			$timezone = new DateTimeZone($config->get('offset'));
+
 			$options = array(
 				"content_type" => $date['content_type'],
 				"content_language" => "",
 				"content_encoding" => "",
 				"content_mD5" => "",
 				"cache_control" => !empty($data['cache_control']) ? 'public, max-age=' . $data['cache_control'] : '',
+				"last_modified" => new DateTime(date("Y-m-d H:i:s", time()), $timezone),
 				"sequence_number" => ""
 			);
+
 
 			if (!$this->azure->setBlobProperties($folder, $data['blob_name'], $options)) {
 				return false;
@@ -219,6 +222,9 @@ class PlgMediaAzure extends JPlugin
 					JFactory::getDocument()->addScriptDeclaration("
 					(function($){
 						$(document).on('click', '.media-detail-form', function(e){
+							e.preventDefault();
+							$(this).parent('td').parent('tr').siblings().removeClass('success');
+							$(this).parent('td').parent('tr').addClass('success');
 							var fileCollapseButton = $(window.parent.document.getElementById('toolbar-upload')).children('button');
 							var folderCollapseButton = $(window.parent.document.getElementById('toolbar-new')).children('button');
 
@@ -245,8 +251,7 @@ class PlgMediaAzure extends JPlugin
 								}
 
 								window.parent.document.getElementById('jform_foldername').setAttribute('disabled', 1);
-
-								e.preventDefault();							}
+							}
 							else
 							{
 								target_form = 'uploadFile';
@@ -489,6 +494,15 @@ class PlgMediaAzure extends JPlugin
 			{
 				$parts = explode("/", $item['content_type']);
 
+				if (is_null($item['cache_control']))
+				{
+					$cache_control = '';
+				}
+				else
+				{
+					$cache_control = preg_replace("/[^0-9,.]/", "", $item['cache_control']);
+				}
+
 				$tmp = new JObject;
 				$tmp->name = $item['name'];
 				$tmp->title = $item['name'];
@@ -497,7 +511,7 @@ class PlgMediaAzure extends JPlugin
 				$tmp->path_relative = false;
 				$tmp->path_absolute = $this->processBlobUrl($item['url']);
 				$tmp->size = $item['size'];
-				$cache_control = is_null($item['cache_control']) ? '' : $item['cache_control'];
+				$cache_control =  empty($cache_control) ? '' : $cache_control;
 				$tmp->properties = json_encode(array('blob_name' => $item['name'], 'content_type' => $item['content_type'], 'cache_control' => $cache_control), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
 				$parts = explode('/', $item['content_type']);
 

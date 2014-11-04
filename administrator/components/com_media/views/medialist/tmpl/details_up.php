@@ -12,6 +12,7 @@ defined('_JEXEC') or die;
 $user = JFactory::getUser();
 ?>
 		<tr>
+			<td>&#160;</td>
 			<td class="imgTotal">
 				<a href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->parent; ?>" target="folderframe">
 					<i class="icon-arrow-up"></i></a>
@@ -21,7 +22,7 @@ $user = JFactory::getUser();
 			</td>
 			<td>&#160;</td>
 			<td>&#160;</td>
-		<?php if ($user->authorise('core.delete', 'com_media')):?>
-			<td>&#160;</td>
-		<?php endif;?>
+			<?php if ($user->authorise('core.delete', 'com_media')):?>
+				<td>&#160;</td>
+			<?php endif; ?>
 		</tr>

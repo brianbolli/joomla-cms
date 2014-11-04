@@ -16,13 +16,14 @@ $user = JFactory::getUser();
 	<table class="table table-striped table-condensed">
 	<thead>
 		<tr>
+			<th width="1%" class="hidden-phone">&nbsp;</th>
 			<th width="1%"><?php echo JText::_('JGLOBAL_PREVIEW'); ?></th>
 			<th><?php echo JText::_('COM_MEDIA_NAME'); ?></th>
 			<th width="15%"><?php echo JText::_('COM_MEDIA_PIXEL_DIMENSIONS'); ?></th>
 			<th width="8%"><?php echo JText::_('COM_MEDIA_FILESIZE'); ?></th>
-		<?php if ($user->authorise('core.delete', 'com_media')):?>
-			<th width="8%"><?php echo JText::_('JACTION_DELETE'); ?></th>
-		<?php endif;?>
+			<?php if ($user->authorise('core.delete', 'com_media')):?>
+				<th width="8%">&nbsp;</th>
+			<?php endif; ?>
 		</tr>
 	</thead>
 	<tbody>
