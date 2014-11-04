@@ -94,8 +94,8 @@
 				<field
 					name="azure_cdn_query_string"
 					type="radio"
-					label="PLG_MEDIA_AZURE_FIELD_DEFAULT_ENDPOINT_LABEL"
-					description="PLG_MEDIA_AZURE_FIELD_DEFAULT_ENDPOINT_DESC"
+					label="PLG_MEDIA_AZURE_FIELD_BLOB_QUERY_STRING_LABEL"
+					description="PLG_MEDIA_AZURE_FIELD_BLOB_QUERY_STRING_DESC"
 					class="radio btn-group">
 					<option value="0">Disabled</option>
 					<option value="1">Enabled</option>

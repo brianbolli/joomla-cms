@@ -206,14 +206,15 @@ var MediaManager = this.MediaManager = {
 		});
 	},
 
+	populateMediaForm: function(properties) {
+		alert('populate media form');
+	},
+
 	_processAjaxRequest: function(url, replace) {
-		console.log('process new ajax request to ' + url);
 		$.ajax({
 			url: url,
 			dataType: 'json',
 			success: function(response) {
-				console.log(response);
-
 				if (!response.success && response.message) {
 					alert(response.message);
 				}

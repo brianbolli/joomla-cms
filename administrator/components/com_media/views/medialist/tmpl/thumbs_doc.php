@@ -27,7 +27,15 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 					<?php echo JHtml::_('image', $this->_tmp_doc->icon_32, $this->_tmp_doc->name, null, true, true) ? JHtml::_('image', $this->_tmp_doc->icon_32, $this->_tmp_doc->title, null, true) : JHtml::_('image', 'media/con_info.png', $this->_tmp_doc->name, null, true); ?></a>
 			</div>
 			<div class="small" title="<?php echo $this->_tmp_doc->name; ?>" >
-				<?php echo JHtml::_('string.truncate', $this->_tmp_doc->name, 10, false); ?>
+				<?php if (!empty($this->_tmp_doc->properties)) : ?>
+					<a
+						href=""
+						class="media-detail-form media-doc"
+						data-properties='<?php echo $this->_tmp_doc->properties; ?>'
+						target="folderframe"><?php echo JHtml::_('string.truncate', $this->_tmp_doc->name, 10, false); ?></a>
+				<?php else : ?>
+					<?php echo JHtml::_('string.truncate', $this->_tmp_doc->name, 10, false); ?>
+				<?php endif; ?>
 			</div>
 		</li>
 <?php

@@ -6,6 +6,11 @@
 		addfieldpath="plugins/media/azure/fields">
 
 		<field
+			name="blob_name"
+			type="hidden"
+		/>
+
+		<field
 			name="content_type"
 			type="ContentType"
 			label="PLG_MEDIA_AZURE_FIELD_CONTENT_TYPE_LABEL"
@@ -19,7 +24,6 @@
 			label="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_LABEL"
 			description="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_DESC"
 			class="readonly"
-			readonly="true"
 			labelclass="control-label"
 		/>
 

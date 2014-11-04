@@ -5,7 +5,7 @@ $input = JFactory::getApplication()->input;
 $session	= JFactory::getSession();
 $config = JComponentHelper::getParams('com_media');
 ?>
-		<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $session->getName().'='.$session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadForm" class="form-horizontal" name="uploadForm" method="post" enctype="multipart/form-data">
+		<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $session->getName().'='.$session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadFile" class="form-horizontal" name="uploadFile" method="post" enctype="multipart/form-data">
 			<div id="uploadform">
 				<div id="upload-noflash" class="control-group">
 					<legend><?php echo JText::_('COM_MEDIA_UPLOAD_FILE') ?></legend>
@@ -38,7 +38,7 @@ $config = JComponentHelper::getParams('com_media');
 					<input class="update-folder" type="hidden" name="folder" id="folder" value="<?php echo $displayData['folder']; ?>" />
 					<input class="update-context" type="hidden" name="context" id="context" value="<?php echo $displayData['context']; ?>" />
 					<div class="controls">
-						<button class="btn btn-primary" id="upload-submit"><i class="icon-upload icon-white"></i> <?php echo JText::_('COM_MEDIA_START_UPLOAD'); ?></button>
+						<button type="submit" class="btn btn-primary" id="file-form-submit"><i class="icon-upload icon-white"></i> <?php echo JText::_('COM_MEDIA_START_UPLOAD'); ?></button>
 					</div>
 					<?php JFactory::getSession()->set('com_media.return_url', 'index.php?option=com_media'); ?>
 				</div>

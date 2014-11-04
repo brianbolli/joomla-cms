@@ -9,6 +9,8 @@
 
 defined('_JEXEC') or die;
 
+JHtml::_('jquery.framework');
+
 ?>
 <form target="_parent" action="index.php?option=com_media&amp;tmpl=index&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder; ?>" method="post" id="mediamanager-form" name="mediamanager-form">
 	<ul class="manager thumbnails">
@@ -37,3 +39,4 @@ defined('_JEXEC') or die;
 		<?php echo JHtml::_('form.token'); ?>
 	</ul>
 </form>
+

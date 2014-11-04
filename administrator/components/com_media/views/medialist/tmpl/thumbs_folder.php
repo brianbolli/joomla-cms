@@ -22,6 +22,12 @@ $user = JFactory::getUser();
 				</a>
 			</div>
 			<div class="small">
-				<a href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->_tmp_folder->path_relative; ?>" target="folderframe"><?php echo JHtml::_('string.truncate', $this->_tmp_folder->name, 10, false); ?></a>
+				<a
+					href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->_tmp_folder->path_relative; ?>"
+					<?php if (!empty($this->_tmp_folder->properties)) : ?>
+						class="media-detail-form media-folder"
+						data-properties='<?php echo $this->_tmp_folder->properties; ?>'
+					<?php endif; ?>
+					target="folderframe"><?php echo JHtml::_('string.truncate', $this->_tmp_folder->name, 10, false); ?></a>
 			</div>
 		</li>

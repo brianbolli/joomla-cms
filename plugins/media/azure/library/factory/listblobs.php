@@ -85,6 +85,7 @@ class ListBlobs extends JAzureQuery
 			$b['url'] = $blob->getUrl();
 			$b['content_type'] = $properties->getContentType();
 			$b['metadata'] = $blob->getMetadata();
+			$b['cache_control'] = $properties->getCacheControl();
 			$b['last_modified'] = date("Y-m-d H:i:s", $properties->getLastModified()->getTimestamp());
 			$b['e_tag'] = $properties->getETag();
 			$b['size'] = $properties->getContentLength();

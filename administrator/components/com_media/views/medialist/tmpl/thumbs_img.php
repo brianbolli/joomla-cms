@@ -28,7 +28,17 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 			</a>
 		</div>
 		<div class="small">
-			<a href="<?php echo ($this->_tmp_img->path_relative) ? COM_MEDIA_BASEURL .'/'.$this->_tmp_img->path_relative : $this->_tmp_img->path_absolute; ?>" title="<?php echo $this->_tmp_img->name; ?>" class="preview"><?php echo JHtml::_('string.truncate', $this->_tmp_img->name, 10, false); ?></a>
+			<a
+				href="<?php echo ($this->_tmp_img->path_relative) ? COM_MEDIA_BASEURL .'/'.$this->_tmp_img->path_relative : $this->_tmp_img->path_absolute; ?>"
+				title="<?php echo $this->_tmp_img->name; ?>"
+				<?php if (!empty($this->_tmp_img->properties)) : ?>
+					class="preview media-detail-form media-img"
+					data-properties='<?php echo $this->_tmp_img->properties; ?>'
+				<?php else : ?>
+					class="preview"
+				<?php endif; ?>
+				>
+				<?php echo JHtml::_('string.truncate', $this->_tmp_img->name, 10, false); ?></a>
 		</div>
 	</li>
 <?php

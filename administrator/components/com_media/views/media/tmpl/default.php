@@ -54,10 +54,10 @@ $input = JFactory::getApplication()->input;
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
 			<div id="collapseUpload" class="collapse">
-				<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $this->session->getName().'='.$this->session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadForm" class="form-inline" name="uploadForm" method="post" enctype="multipart/form-data"></form>
+				<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $this->session->getName().'='.$this->session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadFile" class="form-horizontal" name="uploadFile" method="post" enctype="multipart/form-data"></form>
 			</div>
 			<div id="collapseFolder" class="collapse">
-				<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" class="form-horizontal" method="post"></form>
+				<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="uploadFolder" id="uploadFolder" class="form-horizontal" method="post"></form>
 			</div>
 		<?php endif;?>
 

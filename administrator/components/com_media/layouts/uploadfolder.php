@@ -5,7 +5,7 @@ $input = JFactory::getApplication()->input;
 $session	= JFactory::getSession();
 $config = JComponentHelper::getParams('com_media');
 ?>
-	<form action="index.php?option=com_media&amp;task=folder.create&amp;context=<?php echo $displayData['context']; ?>&amp;folder=<?php $displayData['folder']; ?>&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="folderForm" id="folderForm" class="form-horizontal" method="post">
+	<form action="index.php?option=com_media&amp;task=folder.create&amp;context=<?php echo $displayData['context']; ?>&amp;folder=<?php $displayData['folder']; ?>&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="uploadFolder" id="uploadFolder" class="form-horizontal" method="post">
 		<?php foreach ($displayData['form']->getFieldsets() as $name => $fieldset) : ?>
 			<fieldset class="form-horizontal">
 				<?php if ($fieldset->label) : ?>
@@ -27,7 +27,7 @@ $config = JComponentHelper::getParams('com_media');
 		<?php endforeach; ?>
 		<div class="control-group">
 			<div class="controls">
-				<button type="submit" class="btn"><i class="icon-folder-open"></i> <?php echo JText::_('COM_MEDIA_CREATE_FOLDER'); ?></button>
+				<button type="submit" class="btn btn-primary" id="folder-form-submit"><i class="icon-folder-open"></i> <?php echo JText::_('COM_MEDIA_CREATE_FOLDER'); ?></button>
 			</div>
 		</div>
 		<?php echo JHtml::_('form.token'); ?>

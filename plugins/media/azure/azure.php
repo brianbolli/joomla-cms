@@ -33,7 +33,8 @@ class PlgMediaAzure extends JPlugin
 	{
 		parent::__construct($subject, $config);
 
-		if ($this->params->get('azure_enabled', 0)) {
+		if ($this->params->get('azure_enabled', 0))
+		{
 			JFactory::getLanguage()->load('plg_media_azure');
 			$endpoint = $this->params->get('azure_default_endpoint', null);
 			$name = $this->params->get('azure_account_name', null);
@@ -43,9 +44,11 @@ class PlgMediaAzure extends JPlugin
 		}
 	}
 
-	public function onMediaUploadFile($context, &$object_file, $folder, &$response) {
+	public function onMediaUploadFile($context, &$object_file, $folder, &$response)
+	{
 
-		if ($context === self::CONTEXT) {
+		if ($context === self::CONTEXT)
+		{
 
 			$content = fopen($object_file->tmp_name, 'r');
 
@@ -54,11 +57,11 @@ class PlgMediaAzure extends JPlugin
 				"content_language" => "",
 				"content_encoding" => "",
 				"content_mD5" => "",
-				"cache_control" => "",
+				"cache_control" => !empty($data['cache_control']) ? 'public, max-age=' . $data['cache_control'] : '',
 				"sequence_number" => ""
 			);
 
-			if ($this->azure->createBlockBlob($folder, $object_file->name, $content, $data, $response)) {
+			if (!$this->azure->createBlockBlob($folder, $object_file->name, $content, $data, $response)) {
 				return false;
 			}
 		}
@@ -66,7 +69,31 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFile($context, $object_file, $folder, &$response) {
+	public function onMediaUpdateFile($context, $data, $folder, &$response)
+	{
+			var_dump($data);
+
+		if ($context === self::CONTEXT)
+		{
+			$options = array(
+				"content_type" => $date['content_type'],
+				"content_language" => "",
+				"content_encoding" => "",
+				"content_mD5" => "",
+				"cache_control" => !empty($data['cache_control']) ? 'public, max-age=' . $data['cache_control'] : '',
+				"sequence_number" => ""
+			);
+
+			if (!$this->azure->setBlobProperties($folder, $data['blob_name'], $options)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public function onMediaDeleteFile($context, $object_file, $folder, &$response)
+	{
 		if ($context === self::CONTEXT)
 		{
 
@@ -78,7 +105,17 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaCreateFolder($context, $parent, $folder, $data, &$response) {
+	public function onMediaUpdateFolder($context, $parent, $folder, $data, &$response)
+	{
+
+		if ($context === self::CONTEXT) {
+			$result = $this->azure->setContainerAcl(strtolower($date['container_name']), $data['access_type']);
+		}
+		return true;
+	}
+
+	public function onMediaCreateFolder($context, $parent, $folder, $data, &$response)
+	{
 
 		if ($context === self::CONTEXT) {
 			$result = $this->azure->createContainer(strtolower($folder), $data['access_type']);
@@ -178,6 +215,76 @@ class PlgMediaAzure extends JPlugin
 		{
 			if ($this->azure)
 			{
+
+					JFactory::getDocument()->addScriptDeclaration("
+					(function($){
+						$(document).on('click', '.media-detail-form', function(e){
+							var fileCollapseButton = $(window.parent.document.getElementById('toolbar-upload')).children('button');
+							var folderCollapseButton = $(window.parent.document.getElementById('toolbar-new')).children('button');
+
+							var file_collapse = window.parent.document.getElementById('collapseUpload');
+							var folder_collapse = window.parent.document.getElementById('collapseFolder');
+
+							var target_form, target_submit, task_old, task_new, button_text;
+							if ($(this).hasClass('media-folder'))
+							{
+								target_form = 'uploadFolder';
+								task_old = 'folder.create';
+								task_new = 'folder.update';
+								target_submit = 'folder-form-submit';
+								button_text = ' Update Container';
+
+								if ($(file_collapse).hasClass('in'))
+								{
+									$(fileCollapseButton).click();
+								}
+
+								if (!$(folder_collapse).hasClass('in'))
+								{
+									$(folderCollapseButton).click();
+								}
+
+								window.parent.document.getElementById('jform_foldername').setAttribute('disabled', 1);
+
+								e.preventDefault();							}
+							else
+							{
+								target_form = 'uploadFile';
+								task_old = 'file.upload';
+								task_new = 'file.update';
+								target_submit = 'file-form-submit';
+								button_text = ' Update Blob';
+
+
+								if (!$(file_collapse).hasClass('in'))
+								{
+									$(fileCollapseButton).click();
+								}
+
+								if ($(folder_collapse).hasClass('in'))
+								{
+									$(folderCollapseButton).click();
+								}
+
+								window.parent.document.getElementById('upload-file').setAttribute('disabled', 1);
+							}
+
+							var json = $(this).attr('data-properties');
+							var properties = JSON.parse(json);
+							console.log(properties);
+							for (var property in properties) {
+								window.parent.document.getElementById('jform_' + property).value = properties[property];
+							}
+
+							var uploadform = window.parent.document.getElementById(target_form);
+							var href = uploadform.getAttribute('action');
+							href = href.replace(task_old, task_new);
+							uploadform.setAttribute('action', href);
+
+							window.parent.document.getElementById(target_submit).childNodes[1].nodeValue = button_text;
+						});
+					})(jQuery);
+				");
 				if (empty($current))
 				{
 					$iterateList = $this->azure->listContainers();
@@ -187,11 +294,19 @@ class PlgMediaAzure extends JPlugin
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
 							{
+								var collapse = window.parent.document.getElementById('collapseUpload');
+
 								var el1 = window.parent.document.getElementById('toolbar-new');
 								var button1 = el1.firstElementChild || el1.firstChild;
 								button1.disabled = 0;
+
 								var el2 = window.parent.document.getElementById('toolbar-upload');
 								var button2 = el2.firstElementChild || el2.firstChild;
+
+								if (jQuery(collapse).hasClass('in'))
+								{
+									jQuery(button2).click();
+								}
 								button2.disabled = 1;
 							});"
 						);
@@ -206,9 +321,18 @@ class PlgMediaAzure extends JPlugin
 						JFactory::getDocument()->addScriptDeclaration("
 							window.addEvent('domready', function()
 							{
+								var collapse = window.parent.document.getElementById('collapseFolder');
+
 								var el1 = window.parent.document.getElementById('toolbar-new');
 								var button1 = el1.firstElementChild || el1.firstChild;
+
+								if (jQuery(collapse).hasClass('in'))
+								{
+									jQuery(button1).click();
+								}
+
 								button1.disabled = 1;
+
 								var el2 = window.parent.document.getElementById('toolbar-upload');
 								var button2 = el2.firstElementChild || el2.firstChild;
 								button2.disabled = 0;
@@ -216,6 +340,7 @@ class PlgMediaAzure extends JPlugin
 						);
 					}
 				}
+
 			}
 		} else {
 			if (!$imageList)
@@ -346,6 +471,7 @@ class PlgMediaAzure extends JPlugin
 				$tmp->path_relative = $item['name'];
 				$tmp->files = 0;
 				$tmp->folders = 0;
+				$tmp->properties = json_encode(array('foldername' => $item['name'], 'access_type' => $item['public_access']), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
 				$folders[] = $tmp;
 		}
 
@@ -371,6 +497,8 @@ class PlgMediaAzure extends JPlugin
 				$tmp->path_relative = false;
 				$tmp->path_absolute = $this->processBlobUrl($item['url']);
 				$tmp->size = $item['size'];
+				$cache_control = is_null($item['cache_control']) ? '' : $item['cache_control'];
+				$tmp->properties = json_encode(array('blob_name' => $item['name'], 'content_type' => $item['content_type'], 'cache_control' => $cache_control), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
 				$parts = explode('/', $item['content_type']);
 
 				if ($parts[0] == 'image') {

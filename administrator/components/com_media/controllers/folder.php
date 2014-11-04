@@ -21,6 +21,52 @@ jimport('joomla.filesystem.folder');
  */
 class MediaControllerFolder extends JControllerLegacy
 {
+
+	public function update()
+	{
+		JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+
+		$folder   = $this->input->get('folder', '', 'path');
+		$return   = JFactory::getSession()->get('com_media.return_url');
+		$context  = $this->input->get('context', '', 'string');
+		$data     = $this->input->post->get('jform', '', 'array');
+
+		// Set the redirect
+		if ($return)
+		{
+			$this->setRedirect($return . '&context=' . $context . '&folder=' . $folder);
+		}
+		else
+		{
+			$this->setRedirect('index.php?option=com_media&context=' . $context . '&folder=' . $folder);
+		}
+
+		// Authorize the user
+		if (!$this->authoriseUser('create'))
+		{
+			return false;
+		}
+
+		$response = new stdClass();
+		$response->message = false;
+		$response->type = false;
+
+		// Trigger the onMediaUploadFile event.
+		JPluginHelper::importPlugin('media');
+		$dispatcher	= JEventDispatcher::getInstance();
+		$dispatcher->trigger('onMediaUpdateFolder', array('com_media.' . $context, $data, $folder, &$response));
+
+		if ($response->message)
+		{
+			// Error in upload
+			JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_UNABLE_TO_UPDATE_FILE'));
+			$this->setMessage($response->message, $response->type);
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * Deletes paths from the current path
 	 *
