@@ -34,7 +34,7 @@ JHtml::_('bootstrap.tooltip');
 				<?php if (!empty($this->_tmp_folder->properties)) : ?>
 					<a
 						href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->_tmp_folder->path_relative; ?>"
-						class="btn btn-mini btn-default media-detail-form media-folder"
+						class="btn btn-mini btn-default media-detail media-detail-form media-folder"
 						data-properties='<?php echo $this->_tmp_folder->properties; ?>'
 						target="folderframe">
 						<i class="icon-edit icon-white"></i> <?php echo JText::_('JACTION_EDIT'); ?>

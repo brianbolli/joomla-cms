@@ -53,10 +53,10 @@ $input = JFactory::getApplication()->input;
 		</form>
 
 		<?php if ($user->authorise('core.create', 'com_media')):?>
-			<div id="collapseUpload" class="collapse">
+			<div id="collapseUpload" class="collapse collapseContainer">
 				<form action="<?php echo JUri::base(); ?>index.php?option=com_media&amp;task=file.upload&amp;tmpl=component&amp;<?php echo $this->session->getName().'='.$this->session->getId(); ?>&amp;<?php echo JSession::getFormToken();?>=1&amp;format=html" id="uploadFile" class="form-horizontal" name="uploadFile" method="post" enctype="multipart/form-data"></form>
 			</div>
-			<div id="collapseFolder" class="collapse">
+			<div id="collapseFolder" class="collapse collapseContainer">
 				<form action="index.php?option=com_media&amp;task=folder.create&amp;tmpl=<?php echo $input->getCmd('tmpl', 'index');?>" name="uploadFolder" id="uploadFolder" class="form-horizontal" method="post"></form>
 			</div>
 		<?php endif;?>

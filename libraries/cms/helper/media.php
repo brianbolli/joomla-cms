@@ -49,6 +49,28 @@ class JHelperMedia
 	}
 
 	/**
+	 * Check that the user is authorized to perform this action
+	 *
+	 * @param   string  $action  - the action to be peformed (create or delete)
+	 *
+	 * @return  boolean
+	 *
+	 * @since   3.4
+	 */
+	public static function authoriseUser($action)
+	{
+		if (!JFactory::getUser()->authorise('core.' . strtolower($action), 'com_media'))
+		{
+			// User is not authorised
+			JError::raiseWarning(403, JText::_('JLIB_APPLICATION_ERROR_' . strtoupper($action) . '_NOT_PERMITTED'));
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Checks if the file can be uploaded
 	 *
 	 * @param   array   $file       File information
@@ -317,4 +339,6 @@ class JHelperMedia
 				return $val;
 		}
 	}
+
+
 }

@@ -29,7 +29,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<?php if (!empty($this->_tmp_doc->properties)) : ?>
 					<a
 						href=""
-						class="media-detail-form media-doc"
+						class="media-detail media-detail-form media-doc"
 						data-properties='<?php echo $this->_tmp_doc->properties; ?>'
 						target="folderframe"><?php echo $this->_tmp_doc->title; ?></a>
 				<?php else : ?>

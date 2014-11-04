@@ -3,11 +3,6 @@
 	<fieldset name="uploadcontainer" label="PLG_MEDIA_AZURE_UPLOADCONTAINER_DEFAULT_LABEL" addfieldpath="plugins/media/azure/fields">
 
 		<field
-			name="container_name"
-			type="hidden"
-		/>
-
-		<field
 			name="access_type"
 			type="AccessType"
 			label="Access Type"

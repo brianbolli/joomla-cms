@@ -46,6 +46,8 @@ class MediaViewMediaList extends JViewLegacy
 			});
 		});");
 
+		JFactory::getDocument()->addScript(JUri::root() . 'media/media/js/form-mediamanager.js');
+
 		$images = $this->get('images');
 		$documents = $this->get('documents');
 		$folders = $this->get('folders');

@@ -42,7 +42,7 @@ class MediaControllerFolder extends JControllerLegacy
 		}
 
 		// Authorize the user
-		if (!$this->authoriseUser('create'))
+		if (!JHelperMedia::authoriseUser('manage'))
 		{
 			return false;
 		}
@@ -102,11 +102,8 @@ class MediaControllerFolder extends JControllerLegacy
 			return true;
 		}
 
-		if (!$user->authorise('core.delete', 'com_media'))
+		if (!JHelperMedia::authoriseUser('delete'))
 		{
-			// User is not authorised to delete
-			JError::raiseWarning(403, JText::_('JLIB_APPLICATION_ERROR_DELETE_NOT_PERMITTED'));
-
 			return false;
 		}
 
@@ -181,7 +178,7 @@ class MediaControllerFolder extends JControllerLegacy
 
 		if (strlen($data['foldername']) > 0)
 		{
-			if (!$user->authorise('core.create', 'com_media'))
+			if (!JHelperMedia::authoriseUser('create'))
 			{
 				// User is not authorised to create
 				JError::raiseWarning(403, JText::_('JLIB_APPLICATION_ERROR_CREATE_NOT_PERMITTED'));
@@ -198,7 +195,8 @@ class MediaControllerFolder extends JControllerLegacy
 			$dispatcher	= JEventDispatcher::getInstance();
 			$result = $dispatcher->trigger('onMediaCreateFolder', array('com_media.' . $context, $data['folderpath'], $data['foldername'], $data, &$response));
 
-			if ($result) {
+			if ($result)
+			{
 				$this->input->set('context', $context);
 				$this->input->set('folder', ($folder) ? $folder . '/' . $data['foldername'] : $data['foldername']);
 			} else {
@@ -208,13 +206,13 @@ class MediaControllerFolder extends JControllerLegacy
 		else
 		{
 			// File name is of zero length (null).
-
 			$this->setMessage(JText::_('COM_MEDIA_ERROR_UNABLE_TO_CREATE_FOLDER_WARNDIRNAME'), 'Warning');
 
 			return false;
 		}
 
-		if ($response->message) {
+		if ($response->message)
+		{
 			$this->setMessage($response->message, $response->type);
 		}
 

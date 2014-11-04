@@ -71,13 +71,15 @@ class PlgMediaAzure extends JPlugin
 
 	public function onMediaUpdateFile($context, $data, $folder, &$response)
 	{
+			error_log(json_encode($data));
+			error_log($folder);
 		if ($context === self::CONTEXT)
 		{
 			$config = JFactory::getConfig();
 			$timezone = new DateTimeZone($config->get('offset'));
 
 			$options = array(
-				"content_type" => $date['content_type'],
+				"content_type" => $data['content_type'],
 				"content_language" => "",
 				"content_encoding" => "",
 				"content_mD5" => "",
@@ -108,11 +110,11 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaUpdateFolder($context, $parent, $folder, $data, &$response)
+	public function onMediaUpdateFolder($context, $data, $folder, &$response)
 	{
-
-		if ($context === self::CONTEXT) {
-			$result = $this->azure->setContainerAcl(strtolower($date['container_name']), $data['access_type']);
+		if ($context === self::CONTEXT)
+		{
+			$result = $this->azure->setContainerAcl(strtolower($data['foldername']), $data['access_type']);
 		}
 		return true;
 	}
@@ -126,7 +128,7 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folderpath, $folder, &$response) {
+	public function onMediaDeleteFolder($context, $folder, $folderpath, &$response) {
 		if ($context === self::CONTEXT) {
 
 			// confirm Azure container is empty by retrieving blobs
@@ -218,78 +220,6 @@ class PlgMediaAzure extends JPlugin
 		{
 			if ($this->azure)
 			{
-
-					JFactory::getDocument()->addScriptDeclaration("
-					(function($){
-						$(document).on('click', '.media-detail-form', function(e){
-							e.preventDefault();
-							$(this).parent('td').parent('tr').siblings().removeClass('success');
-							$(this).parent('td').parent('tr').addClass('success');
-							var fileCollapseButton = $(window.parent.document.getElementById('toolbar-upload')).children('button');
-							var folderCollapseButton = $(window.parent.document.getElementById('toolbar-new')).children('button');
-
-							var file_collapse = window.parent.document.getElementById('collapseUpload');
-							var folder_collapse = window.parent.document.getElementById('collapseFolder');
-
-							var target_form, target_submit, task_old, task_new, button_text;
-							if ($(this).hasClass('media-folder'))
-							{
-								target_form = 'uploadFolder';
-								task_old = 'folder.create';
-								task_new = 'folder.update';
-								target_submit = 'folder-form-submit';
-								button_text = ' Update Container';
-
-								if ($(file_collapse).hasClass('in'))
-								{
-									$(fileCollapseButton).click();
-								}
-
-								if (!$(folder_collapse).hasClass('in'))
-								{
-									$(folderCollapseButton).click();
-								}
-
-								window.parent.document.getElementById('jform_foldername').setAttribute('disabled', 1);
-							}
-							else
-							{
-								target_form = 'uploadFile';
-								task_old = 'file.upload';
-								task_new = 'file.update';
-								target_submit = 'file-form-submit';
-								button_text = ' Update Blob';
-
-
-								if (!$(file_collapse).hasClass('in'))
-								{
-									$(fileCollapseButton).click();
-								}
-
-								if ($(folder_collapse).hasClass('in'))
-								{
-									$(folderCollapseButton).click();
-								}
-
-								window.parent.document.getElementById('upload-file').setAttribute('disabled', 1);
-							}
-
-							var json = $(this).attr('data-properties');
-							var properties = JSON.parse(json);
-							console.log(properties);
-							for (var property in properties) {
-								window.parent.document.getElementById('jform_' + property).value = properties[property];
-							}
-
-							var uploadform = window.parent.document.getElementById(target_form);
-							var href = uploadform.getAttribute('action');
-							href = href.replace(task_old, task_new);
-							uploadform.setAttribute('action', href);
-
-							window.parent.document.getElementById(target_submit).childNodes[1].nodeValue = button_text;
-						});
-					})(jQuery);
-				");
 				if (empty($current))
 				{
 					$iterateList = $this->azure->listContainers();
@@ -500,7 +430,7 @@ class PlgMediaAzure extends JPlugin
 				}
 				else
 				{
-					$cache_control = preg_replace("/[^0-9,.]/", "", $item['cache_control']);
+					$cache_control = preg_replace("/[^0-9]/", "", $item['cache_control']);
 				}
 
 				$tmp = new JObject;

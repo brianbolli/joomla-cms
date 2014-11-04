@@ -30,7 +30,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<?php if (!empty($this->_tmp_doc->properties)) : ?>
 					<a
 						href=""
-						class="media-detail-form media-doc"
+						class="media-thumb media-detail-form media-doc"
 						data-properties='<?php echo $this->_tmp_doc->properties; ?>'
 						target="folderframe"><?php echo JHtml::_('string.truncate', $this->_tmp_doc->name, 10, false); ?></a>
 				<?php else : ?>

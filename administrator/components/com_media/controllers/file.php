@@ -48,7 +48,7 @@ class MediaControllerFile extends JControllerLegacy
 		}
 
 		// Authorize the user
-		if (!$this->authoriseUser('create'))
+		if (!JHelperMedia::authoriseUser('create'))
 		{
 			return false;
 		}
@@ -103,7 +103,7 @@ class MediaControllerFile extends JControllerLegacy
 		}
 
 		// Authorize the user
-		if (!$this->authoriseUser('create'))
+		if (!JHelperMedia::authoriseUser('create'))
 		{
 			return false;
 		}
@@ -226,28 +226,6 @@ class MediaControllerFile extends JControllerLegacy
 	}
 
 	/**
-	 * Check that the user is authorized to perform this action
-	 *
-	 * @param   string  $action  - the action to be peformed (create or delete)
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.6
-	 */
-	protected function authoriseUser($action)
-	{
-		if (!JFactory::getUser()->authorise('core.' . strtolower($action), 'com_media'))
-		{
-			// User is not authorised
-			JError::raiseWarning(403, JText::_('JLIB_APPLICATION_ERROR_' . strtoupper($action) . '_NOT_PERMITTED'));
-
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Deletes paths from the current path
 	 *
 	 * @return  boolean
@@ -281,7 +259,7 @@ class MediaControllerFile extends JControllerLegacy
 		}
 
 		// Authorize the user
-		if (!$this->authoriseUser('delete'))
+		if (!JHelperMedia::authoriseUser('delete'))
 		{
 			return false;
 		}
@@ -301,6 +279,7 @@ class MediaControllerFile extends JControllerLegacy
 		{
 			if (is_dir($file))
 			{
+					//error_log('is dir');
 				// Trigger the onContentBeforeDelete event.
 				$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.folder', &$object_file));
 
@@ -324,15 +303,22 @@ class MediaControllerFile extends JControllerLegacy
 			}
 			else
 			{
+					//error_log('is file: ' . $file);
+					$filename = str_replace(JUri::root(), '', $file);
+					$pos = strrpos($filename, '/');
+					$filename = substr($filename, $pos + 1, strlen($filename));
+					//error_log($filename);
 				if ($context == 'joomla')
 				{
-					$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $file)));
+					$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, 'images' . DIRECTORY_SEPARATOR . $folder, $filename)));
 					$object_file = new JObject(array('filepath' => $fullPath));
 				}
 				else
 				{
 					$object_file = new JObject(array('filepath' => urldecode($file)));
 				}
+
+				error_log(json_encode($object_file));
 
 				// Trigger the onContentBeforeDelete event.
 				$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.file', &$object_file));

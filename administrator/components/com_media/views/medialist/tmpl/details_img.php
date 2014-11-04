@@ -39,7 +39,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<?php if (!empty($this->_tmp_img->properties)) : ?>
 					<a
 						href=""
-						class="img-edit btn btn-mini btn-default media-detail-form"
+						class="img-edit btn btn-mini btn-default media-detail media-detail-form"
 						title="<?php echo $this->_tmp_img->name; ?>"
 						data-properties='<?php echo $this->_tmp_img->properties; ?>'
 						rel="preview">

@@ -175,7 +175,7 @@ class PlgMediaJoomla extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folderpath, $folder, &$response) {
+	public function onMediaDeleteFolder($context, $folder, $folderpath, &$response) {
 
 		if ($context === self::CONTEXT)
 		{

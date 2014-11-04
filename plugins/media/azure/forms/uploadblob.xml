@@ -7,7 +7,11 @@
 
 		<field
 			name="blob_name"
-			type="hidden"
+			type="text"
+			label="PLG_MEDIA_AZURE_FIELD_BLOB_NAME_LABEL"
+			description="PLG_MEDIA_AZURE_FIELD_BLOB_NAME_DESC"
+			labelclass="control-label"
+			readonly="true"
 		/>
 
 		<field
@@ -24,6 +28,7 @@
 			label="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_LABEL"
 			description="PLG_MEDIA_AZURE_FIELD_CACHE_CONTROL_DESC"
 			class="readonly"
+			filter="integer"
 			labelclass="control-label"
 		/>
 

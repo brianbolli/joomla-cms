@@ -4195,6 +4195,14 @@ input[type="submit"].btn.btn-mini {
 	-o-transition: all .2s ease-in-out;
 	transition: all .2s ease-in-out;
 }
+li.thumbnail.active {
+	background: #dff0d8;
+	/*
+	-webkit-box-shadow: 0 1px 3px rgba(223,240,216,0.055);
+	-moz-box-shadow: 0 1px 3px rgba(223,240,216,0.055);
+	box-shadow: 0 1px 3px rgba(223,240,216,0.055);
+	*/
+}
 a.thumbnail:hover,
 a.thumbnail:focus {
 	border-color: #08c;
