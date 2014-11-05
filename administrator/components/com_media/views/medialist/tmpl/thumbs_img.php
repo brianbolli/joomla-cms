@@ -32,7 +32,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				href="<?php echo ($this->_tmp_img->path_relative) ? COM_MEDIA_BASEURL .'/'.$this->_tmp_img->path_relative : $this->_tmp_img->path_absolute; ?>"
 				title="<?php echo $this->_tmp_img->name; ?>"
 				<?php if (!empty($this->_tmp_img->properties)) : ?>
-					class="media-thumb preview media-detail-form media-img"
+					class="media-thumb preview media-form media-img"
 					data-properties='<?php echo $this->_tmp_img->properties; ?>'
 				<?php else : ?>
 					class="preview"

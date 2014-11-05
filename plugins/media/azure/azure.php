@@ -101,7 +101,6 @@ class PlgMediaAzure extends JPlugin
 	{
 		if ($context === self::CONTEXT)
 		{
-
 			// Azure blobs use URLs, therefor no need to compensate for directory seperator specific syntax
 			$pos = strrpos($object_file->filepath, '/');
 			$blob = substr($object_file->filepath, $pos + 1, strlen($object_file->filepath));

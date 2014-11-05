@@ -1,24 +1,65 @@
 (function($){
 
-	$(document).on('click', '.media-detail-form', function(e){
+	var file_collapse;
+	var folder_collapse;
+
+	$(function() {
+		file_collapse = window.parent.document.getElementById('collapseUpload');
+		folder_collapse = window.parent.document.getElementById('collapseFolder');
+	})
+
+	function expandMediaForm(form_id, detail) {
+
+	}
+
+	function shrinkMediaForm(form_id, detail) {
+
+	}
+
+	$(document).on('click', '.media-form', function(e){
 		e.preventDefault();
 
 		if ($(this).hasClass('media-detail'))
 		{
-			$(this).parent('td').parent('tr').siblings().removeClass('success');
-			$(this).parent('td').parent('tr').addClass('success');
+			if ($(this).parent('td').parent('tr').hasClass('success'))
+			{
+				if ($(this).hasClass('media-folder'))
+				{
+					$(folder_collapse).collapse('hide');
+				}
+				else
+				{
+					$(file_collapse).collapse('hide');
+				}
+				return true;
+			}
+			else
+			{
+				$(this).parent('td').parent('tr').siblings().removeClass('success');
+				$(this).parent('td').parent('tr').addClass('success');
+			}
 		}
 		else
 		{
-			$(this).parent('div').parent('li').siblings().removeClass('active');
-			$(this).parent('div').parent('li').addClass('active');
+			if ($(this).parent('div').parent('li').hasClass('active'))
+			{
+				if ($(this).hasClass('media-folder'))
+				{
+					$(folder_collapse).collapse('hide');
+				}
+				else
+				{
+					$(file_collapse).collapse('hide');
+				}
+				return true;
+			}
+			else
+			{
+				$(this).parent('div').parent('li').siblings().removeClass('active');
+				$(this).parent('div').parent('li').addClass('active');
+			}
 		}
 
-		var fileCollapseButton = $(window.parent.document.getElementById('toolbar-upload')).children('button');
-		var folderCollapseButton = $(window.parent.document.getElementById('toolbar-new')).children('button');
-
-		var file_collapse = window.parent.document.getElementById('collapseUpload');
-		var folder_collapse = window.parent.document.getElementById('collapseFolder');
 
 		var target_form, target_submit, task_old, task_new, button_text;
 		if ($(this).hasClass('media-folder'))
@@ -31,12 +72,12 @@
 
 			if ($(file_collapse).hasClass('in'))
 			{
-				$(fileCollapseButton).click();
+				$(file_collapse).collapse('hide');
 			}
 
 			if (!$(folder_collapse).hasClass('in'))
 			{
-				$(folderCollapseButton).click();
+				$(folder_collapse).collapse('hide');
 			}
 
 			window.parent.document.getElementById('jform_foldername').setAttribute('readonly', 1);
@@ -52,12 +93,12 @@
 
 			if (!$(file_collapse).hasClass('in'))
 			{
-				$(fileCollapseButton).click();
+				$(file_collapse).collapse('hide');
 			}
 
 			if ($(folder_collapse).hasClass('in'))
 			{
-				$(folderCollapseButton).click();
+				$(folder_collapse).collapse('hide');
 			}
 
 			window.parent.document.getElementById('upload-file').setAttribute('disabled', 1);

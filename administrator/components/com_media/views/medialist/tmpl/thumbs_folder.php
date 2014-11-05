@@ -25,7 +25,7 @@ $user = JFactory::getUser();
 				<a
 					href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->_tmp_folder->path_relative; ?>"
 					<?php if (!empty($this->_tmp_folder->properties)) : ?>
-						class="media-thumb media-detail-form media-folder"
+						class="media-thumb media-form media-folder"
 						data-properties='<?php echo $this->_tmp_folder->properties; ?>'
 					<?php endif; ?>
 					target="folderframe"><?php echo JHtml::_('string.truncate', $this->_tmp_folder->name, 10, false); ?></a>
