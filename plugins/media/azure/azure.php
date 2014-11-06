@@ -97,14 +97,12 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFile($context, $object_file, $folder, &$response)
+	public function onMediaDeleteFile($context, $folder, &$object_file, &$response)
 	{
 		if ($context === self::CONTEXT)
 		{
-			// Azure blobs use URLs, therefor no need to compensate for directory seperator specific syntax
-			$pos = strrpos($object_file->filepath, '/');
-			$blob = substr($object_file->filepath, $pos + 1, strlen($object_file->filepath));
-			$this->azure->deleteBlob(strtolower($folder), $blob);
+			$object_file->name = $object_file->filepath;
+			$this->azure->deleteBlob(strtolower($folder), $object_file->name);
 		}
 		return true;
 	}
@@ -127,7 +125,7 @@ class PlgMediaAzure extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folder, $folderpath, &$response) {
+	public function onMediaDeleteFolder($context, $folder, &$object_file, &$response) {
 		if ($context === self::CONTEXT) {
 
 			// confirm Azure container is empty by retrieving blobs

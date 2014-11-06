@@ -39,7 +39,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<?php if (!empty($this->_tmp_img->properties)) : ?>
 					<a
 						href=""
-						class="img-edit btn btn-mini btn-default media-detail media-detail-form"
+						class="img-edit btn btn-mini btn-default media-detail media-form media-image"
 						title="<?php echo $this->_tmp_img->name; ?>"
 						data-properties='<?php echo $this->_tmp_img->properties; ?>'
 						rel="preview">
@@ -47,7 +47,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 					</a>
 				<?php endif; ?>
 				&nbsp;
-				<a class="delete-item btn btn-mini btn-danger" target="_top" href="index.php?option=com_media&amp;task=file.delete&amp;tmpl=index&amp;context=<?php echo $this->state->context; ?>&amp;<?php echo JSession::getFormToken(); ?>=1&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder; ?>&amp;rm[]=<?php echo ($this->_tmp_img->path_relative) ? $this->_tmp_img->name : urlencode($this->_tmp_img->path_absolute); ?>" rel="<?php echo $this->_tmp_img->name; ?>" rel="<?php echo $this->_tmp_img->name; ?>"><i class="icon-remove hasTooltip" title="<?php echo JHtml::tooltipText('JACTION_DELETE');?>"></i></a>
+				<a class="delete-item btn btn-mini btn-danger" target="_top" href="index.php?option=com_media&amp;task=file.delete&amp;tmpl=index&amp;<?php echo JSession::getFormToken(); ?>=1&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->state->folder; ?>&amp;rm[]=<?php echo ($this->_tmp_img->path_relative) ? $this->_tmp_img->name : urlencode($this->_tmp_img->path_absolute); ?>" rel="<?php echo $this->_tmp_img->name; ?>" rel="<?php echo $this->_tmp_img->name; ?>"><i class="icon-remove hasTooltip" title="<?php echo JHtml::tooltipText('JACTION_DELETE');?>"></i></a>
 			</td>
 		<?php endif;?>
 		</tr>

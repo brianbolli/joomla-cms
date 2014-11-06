@@ -27,22 +27,16 @@ var MediaManager = this.MediaManager = {
 		this.frameurl	= this.frame.location.href;
 
 		$('#collapseUpload').on('hidden', function () {
-			$('#folderframe').contents().find('tr').removeClass('success');
-			$('#folderframe').contents().find('li.imgOutline.thumbnail').removeClass('active');
 			$('#upload-file').prop('disabled', 0);
 			$('#uploadFile').find('input').val('');
 			$('#uploadFile').find('select').val('');
-			this.updateMediaFormAction('#uploadFile', 'file.update', 'file.upload');
-			this.updateMediaFormButton('#uploadFile', 'Start Upload');
 		});
 
 		$('#collapseFolder').on('hidden', function () {
-			$('#folderframe').contents().find('tr').removeClass('success');
-			$('#folderframe').contents().find('li.imgOutline.thumbnail').removeClass('active');
+			console.log('collapse folder');
+			$('#jform_foldername').prop('readonly', 0);
 			$('#uploadFolder').find('input').val('');
 			$('#uploadFolder').find('select').val('');
-			this.updateMediaFormAction('#uploadFolder', 'folder.update', 'folder.create');
-			this.updateMediaFormButton('#uploadFolder', 'Create Folder');
 		});
 	},
 
@@ -118,15 +112,6 @@ var MediaManager = this.MediaManager = {
 	updateMediaFolderForm: function(context, folder) {
 		var url = 'index.php?option=com_media&task=folder.form&context=' + context + '&folder=' + folder + '&format=json';
 		this._processAjaxRequest(url, '#collapseFolder');
-	},
-
-	updateMediaFormAction: function(form, current, updated) {
-		var action = $(form).attr('action');
-		$(form).attr('action', str_replace(current, updated, action));
-	},
-
-	updateMediaFormButton: function(form, text) {
-		$(form).find('button[type="submit"]').text(text);
 	},
 
 	oncreatefolder: function()

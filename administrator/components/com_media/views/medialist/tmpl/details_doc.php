@@ -25,16 +25,8 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<a  title="<?php echo $this->_tmp_doc->name; ?>">
 					<?php  echo JHtml::_('image', $this->_tmp_doc->icon_16, $this->_tmp_doc->title, null, true, true) ? JHtml::_('image', $this->_tmp_doc->icon_16, $this->_tmp_doc->title, array('width' => 16, 'height' => 16), true) : JHtml::_('image', 'media/con_info.png', $this->_tmp_doc->title, array('width' => 16, 'height' => 16), true);?> </a>
 			</td>
-			<td class="description" title="<?php echo $this->_tmp_doc->name; ?>">
-				<?php if (!empty($this->_tmp_doc->properties)) : ?>
-					<a
-						href=""
-						class="media-detail media-detail-form media-doc"
-						data-properties='<?php echo $this->_tmp_doc->properties; ?>'
-						target="folderframe"><?php echo $this->_tmp_doc->title; ?></a>
-				<?php else : ?>
-					<?php echo $this->_tmp_doc->title; ?>
-				<?php endif; ?>
+			<td class="description"  title="<?php echo $this->_tmp_doc->name; ?>">
+				<?php echo $this->_tmp_doc->title; ?>
 			</td>
 			<td>&#160;
 
@@ -47,7 +39,7 @@ $dispatcher->trigger('onContentBeforeDisplay', array('com_media.file', &$this->_
 				<?php if (!empty($this->_tmp_doc->properties)) : ?>
 					<a
 						href="index.php?option=com_media&amp;view=mediaList&amp;tmpl=component&amp;context=<?php echo $this->state->context; ?>&amp;folder=<?php echo $this->_tmp_doc->path_relative; ?>"
-						class="btn btn-mini btn-default media-detail-form media-doc"
+						class="btn btn-mini btn-default media-detail media-form media-doc"
 						data-properties='<?php echo $this->_tmp_doc->properties; ?>'
 						target="folderframe">
 						<i class="icon-edit icon-white"></i> <?php echo JText::_('JACTION_EDIT'); ?>

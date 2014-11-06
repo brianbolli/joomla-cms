@@ -279,7 +279,6 @@ class MediaControllerFile extends JControllerLegacy
 		{
 			if (is_dir($file))
 			{
-					//error_log('is dir');
 				// Trigger the onContentBeforeDelete event.
 				$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.folder', &$object_file));
 
@@ -303,25 +302,21 @@ class MediaControllerFile extends JControllerLegacy
 			}
 			else
 			{
-					//error_log('is file: ' . $file);
-					$filename = str_replace(JUri::root(), '', $file);
-					$pos = strrpos($filename, '/');
-					$filename = substr($filename, $pos + 1, strlen($filename));
-					//error_log($filename);
+				$name = JFile::makeSafe($file);
+
 				if ($context == 'joomla')
 				{
-					$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, 'images' . DIRECTORY_SEPARATOR . $folder, $filename)));
-					$object_file = new JObject(array('filepath' => $fullPath));
+					//$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, 'images' . DIRECTORY_SEPARATOR . $folder, $filename)));
+					$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $file)));
+					$object_file = new JObject(array('name' => $name, 'filepath' => $fullPath));
 				}
 				else
 				{
 					$object_file = new JObject(array('filepath' => urldecode($file)));
 				}
 
-				error_log(json_encode($object_file));
-
 				// Trigger the onContentBeforeDelete event.
-				$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.file', &$object_file));
+				$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.file.' . $context, &$object_file));
 
 				if (in_array(false, $result, true))
 				{
@@ -335,7 +330,7 @@ class MediaControllerFile extends JControllerLegacy
 				$response->type = false;
 
 				// Trigger the onMediaUploadFile event.
-				$result = $dispatcher->trigger('onMediaDeleteFile', array('com_media.' . $context, $object_file, $folder, &$response));
+				$result = $dispatcher->trigger('onMediaDeleteFile', array('com_media.' . $context, $folder, &$object_file, &$response));
 
 				if (in_array(false, $result, true))
 				{
@@ -344,10 +339,11 @@ class MediaControllerFile extends JControllerLegacy
 					return false;
 				}
 			}
-
+			error_log($object_file->name);
+			error_log(json_encode($object_file));
 			// Trigger the onContentAfterDelete event.
-			$dispatcher->trigger('onContentAfterDelete', array('com_media.file', &$object_file));
-			$this->setMessage(JText::sprintf('COM_MEDIA_DELETE_COMPLETE', substr($object_file->filepath, strlen(COM_MEDIA_BASE))));
+			$dispatcher->trigger('onContentAfterDelete', array('com_media.file.', &$object_file));
+			$this->setMessage(JText::sprintf('COM_MEDIA_DELETE_COMPLETE', $object_file->name));
 
 		}
 

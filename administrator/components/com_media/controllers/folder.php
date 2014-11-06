@@ -84,9 +84,9 @@ class MediaControllerFolder extends JControllerLegacy
 		$tmpl    = $this->input->get('tmpl');
 		$paths   = $this->input->get('rm', array(), 'array');
 		$context = $this->input->get('context', 'joomla', 'string');
-		$folderbase  = $this->input->get('folder', '', 'path');
+		$folder  = $this->input->get('folder', '', 'path');
 
-		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folderbase;
+		$redirect = 'index.php?option=com_media&context=' . $context . '&folder=' . $folder;
 
 		if ($tmpl == 'component')
 		{
@@ -115,8 +115,19 @@ class MediaControllerFolder extends JControllerLegacy
 		JPluginHelper::importPlugin('media');
 		$dispatcher	= JEventDispatcher::getInstance();
 
-		foreach ($paths as $folder)
+		foreach ($paths as $path)
 		{
+			if ($path !== JFile::makeSafe($path))
+			{
+				$dirname = htmlspecialchars($path, ENT_COMPAT, 'UTF-8');
+				JError::raiseWarning(100, JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_WARNDIRNAME', substr($dirname, strlen(COM_MEDIA_BASE))));
+				return false;
+			}
+
+			$fullPath = JPath::clean(implode(DIRECTORY_SEPARATOR, array(COM_MEDIA_BASE, $folder, $path)));
+			$object_file = new JObject(array('filepath' => $fullPath));
+			error_log(json_encode($object_file));
+
 			// Trigger the onContentBeforeDelete event.
 			$result = $dispatcher->trigger('onContentBeforeDelete', array('com_media.folder', &$object_file));
 
@@ -127,7 +138,7 @@ class MediaControllerFolder extends JControllerLegacy
 				return false;
 			}
 
-			$result = $dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $folderbase, $folder, &$response));
+			$result = $dispatcher->trigger('onMediaDeleteFolder', array('com_media.' . $context, $path, &$object_file, &$response));
 
 			if (in_array(false, $result, true))
 			{
@@ -141,7 +152,7 @@ class MediaControllerFolder extends JControllerLegacy
 		}
 
 		$this->input->set('context', $context);
-		$this->input->set('folder', ($parent) ? $parent . '/' . $folderbase : $folderbase);
+		$this->input->set('folder', $folder);
 
 		return true;
 	}
@@ -198,7 +209,7 @@ class MediaControllerFolder extends JControllerLegacy
 			if ($result)
 			{
 				$this->input->set('context', $context);
-				$this->input->set('folder', ($folder) ? $folder . '/' . $data['foldername'] : $data['foldername']);
+				$this->input->set('folder', ($folderbase) ? $folderbase . '/' . $data['foldername'] : $data['foldername']);
 			} else {
 				$this->setMessage($response->message, $response->type);
 			}

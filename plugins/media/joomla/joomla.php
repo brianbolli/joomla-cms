@@ -151,14 +151,10 @@ class PlgMediaJoomla extends JPlugin
 	}
 
 
-	public function onMediaDeleteFile($context, $object_file, $folder, &$response) {
-
+	public function onMediaDeleteFile($context, $folder, &$object_file, &$response) {
 		if ($context === self::CONTEXT)
 		{
-
-			$pos = strrpos($object_file->filepath, DIRECTORY_SEPARATOR);
-			$filename = substr($object_file->filepath, $pos + 1, strlen($object_file->filepath));
-			if ($filename !== JFile::makeSafe($filename))
+			if ($object_file->name !== JFile::makeSafe($object_file->name))
 			{
 				// filename is not safe
 				$filename = htmlspecialchars($path, ENT_COMPAT, 'UTF-8');
@@ -175,39 +171,33 @@ class PlgMediaJoomla extends JPlugin
 		return true;
 	}
 
-	public function onMediaDeleteFolder($context, $folder, $folderpath, &$response) {
+	public function onMediaDeleteFolder($context, $folder, &$object_file, &$response) {
 
 		if ($context === self::CONTEXT)
 		{
-			$deletePath = COM_MEDIA_BASE . '/';
-			if (!empty($folderpath)) {
-				$deletePath .= $folderpath . '/';
-			}
-			$deletePath .=  $folder;
-
-			if (is_dir($deletePath))
+			if (is_dir($object_file->filepath))
 			{
-				$contents = JFolder::files($deletePath, '.', true, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));
+				$contents = JFolder::files($object_file->filepath, '.', true, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));
 
 				if (empty($contents))
 				{
-					if (!JFolder::delete($deletePath))
+					if (!JFolder::delete($object_file->filepath))
 					{
-						$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+						$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($object_file->filepath, strlen(COM_MEDIA_BASE)));
 						$response->type = 'Warning';
 						return false;
 					}
 				}
 				else
 				{
-					$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+					$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($object_file->filepath, strlen(COM_MEDIA_BASE)));
 					$response->type = 'Warning';
 					return false;
 				}
 			}
 			else
 			{
-				$response->message = JText::sprintf('COM_MEDIA_ERROR_UNABLE_TO_DELETE_FOLDER_NOT_EMPTY', substr($deletePath, strlen(COM_MEDIA_BASE)));
+				$response->message = JText::sprintf('PLG_MEDIA_JOOMLA_ERROR_UNABLE_TO_DELETE_FOLDER_DOE_NOT_EXIST', substr($object_file->filepath, strlen(COM_MEDIA_BASE)));
 				$response->type = 'Warning';
 				return false;
 			}
