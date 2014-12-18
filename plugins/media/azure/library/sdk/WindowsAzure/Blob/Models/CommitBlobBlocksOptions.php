@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * PHP version 5
  *
  * @category  Microsoft
@@ -21,9 +21,12 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  * @link      https://github.com/windowsazure/azure-sdk-for-php
  */
- 
+
 namespace WindowsAzure\Blob\Models;
 use WindowsAzure\Common\Internal\Validate;
+
+// no direct access
+defined('_JEXEC') or die;
 
 /**
  * Optional parameters for commitBlobBlocks
@@ -42,42 +45,42 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
      * @var string
      */
     private $_blobContentType;
-    
+
     /**
      * @var string
      */
     private $_blobContentEncoding;
-    
+
     /**
      * @var string
      */
     private $_blobContentLanguage;
-    
+
     /**
      * @var string
      */
     private $_blobContentMD5;
-    
+
     /**
      * @var string
      */
     private $_blobCacheControl;
-    
+
     /**
      * @var array
      */
     private $_metadata;
-    
+
     /**
      * @var string
      */
     private $_leaseId;
-    
+
     /**
      * @var AccessCondition
      */
     private $_accessCondition;
-    
+
     /**
      * Gets blob ContentType.
      *
@@ -99,7 +102,7 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
     {
         $this->_blobContentType = $blobContentType;
     }
-    
+
     /**
      * Gets blob ContentEncoding.
      *
@@ -121,7 +124,7 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
     {
         $this->_blobContentEncoding = $blobContentEncoding;
     }
-    
+
     /**
      * Gets blob ContentLanguage.
      *
@@ -143,7 +146,7 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
     {
         $this->_blobContentLanguage = $blobContentLanguage;
     }
-    
+
     /**
      * Gets blob ContentMD5.
      *
@@ -165,7 +168,7 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
     {
         $this->_blobContentMD5 = $blobContentMD5;
     }
-    
+
     /**
      * Gets blob cache control.
      *
@@ -175,41 +178,41 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
     {
         return $this->_blobCacheControl;
     }
-    
+
     /**
      * Sets blob cacheControl.
      *
      * @param string $blobCacheControl value to use.
-     * 
+     *
      * @return none.
      */
     public function setBlobCacheControl($blobCacheControl)
     {
         $this->_blobCacheControl = $blobCacheControl;
     }
-    
+
     /**
      * Gets access condition
-     * 
+     *
      * @return AccessCondition
      */
     public function getAccessCondition()
     {
         return $this->_accessCondition;
     }
-    
+
     /**
      * Sets access condition
-     * 
+     *
      * @param AccessCondition $accessCondition value to use.
-     * 
+     *
      * @return none.
      */
     public function setAccessCondition($accessCondition)
     {
         $this->_accessCondition = $accessCondition;
     }
-    
+
     /**
      * Gets blob metadata.
      *
@@ -224,29 +227,29 @@ class CommitBlobBlocksOptions extends BlobServiceOptions
      * Sets blob metadata.
      *
      * @param string $metadata value.
-     * 
+     *
      * @return none.
      */
     public function setMetadata($metadata)
     {
         $this->_metadata = $metadata;
     }
-    
+
     /**
      * Gets lease Id for the blob
-     * 
+     *
      * @return string
      */
     public function getLeaseId()
     {
         return $this->_leaseId;
     }
-    
+
     /**
      * Sets lease Id for the blob
-     * 
+     *
      * @param string $leaseId the blob lease id.
-     * 
+     *
      * @return none
      */
     public function setLeaseId($leaseId)

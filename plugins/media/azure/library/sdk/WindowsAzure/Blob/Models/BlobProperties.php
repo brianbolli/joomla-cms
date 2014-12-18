@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * PHP version 5
  *
  * @category  Microsoft
@@ -21,11 +21,14 @@
  * @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  * @link      https://github.com/windowsazure/azure-sdk-for-php
  */
- 
+
 namespace WindowsAzure\Blob\Models;
 use WindowsAzure\Common\Internal\Resources;
 use WindowsAzure\Common\Internal\Validate;
 use WindowsAzure\Common\Internal\Utilities;
+
+// no direct access
+defined('_JEXEC') or die;
 
 /**
  * Represents blob properties
@@ -44,84 +47,84 @@ class BlobProperties
      * @var \DateTime
      */
     private $_lastModified;
-    
+
     /**
      * @var string
      */
     private $_etag;
-    
+
     /**
      * @var string
      */
     private $_contentType;
-    
+
     /**
      * @var integer
      */
     private $_contentLength;
-    
+
     /**
      * @var string
      */
     private $_contentEncoding;
-    
+
     /**
      * @var string
      */
     private $_contentLanguage;
-    
+
     /**
      * @var string
      */
     private $_contentMD5;
-    
+
     /**
      * @var string
      */
     private $_contentRange;
-    
+
     /**
      * @var string
      */
     private $_cacheControl;
-    
+
     /**
      * @var string
      */
     private $_blobType;
-    
+
     /**
      * @var string
      */
     private $_leaseStatus;
-    
+
     /**
      * @var integer
      */
     private $_sequenceNumber;
-    
+
     /**
      * Creates BlobProperties object from $parsed response in array representation
-     * 
+     *
      * @param array $parsed parsed response in array format.
-     * 
+     *
      * @return BlobProperties
      */
     public static function create($parsed)
     {
         $result = new BlobProperties();
         $clean  = array_change_key_case($parsed);
-        
+
         $date = Utilities::tryGetValue($clean, Resources::LAST_MODIFIED);
         $result->setBlobType(Utilities::tryGetValue($clean, 'blobtype'));
         $result->setContentLength(intval($clean[Resources::CONTENT_LENGTH]));
         $result->setETag(Utilities::tryGetValue($clean, Resources::ETAG));
-        
+
         if (!is_null($date)) {
             $date = Utilities::rfc1123ToDateTime($date);
             $result->setLastModified($date);
         }
-        
+
         $result->setLeaseStatus(Utilities::tryGetValue($clean, 'leasestatus'));
         $result->setLeaseStatus(
             Utilities::tryGetValue(
@@ -156,8 +159,29 @@ class BlobProperties
         $result->setContentType(
             Utilities::tryGetValue($clean, Resources::CONTENT_TYPE)
         );
-        
+
         return $result;
+    }
+
+    /**
+     * Makes deep copy from the current object.
+     *
+     * @return BlobProperties
+     */
+    public function __clone()
+    {
+        $this->_blobType        = $this->_blobType;
+        $this->_cacheControl    = $this->_cacheControl;
+        $this->_contentEncoding = $this->_contentEncoding;
+        $this->_contentLanguage = $this->_contentLanguage;
+        $this->_contentLength   = $this->_contentLength;
+        $this->_contentMD5      = $this->_contentMD5;
+        $this->_contentRange    = $this->_contentRange;
+        $this->_contentType     = $this->_contentType;
+        $this->_etag            = $this->_etag;
+        $this->_lastModified    = $this->_lastModified;
+        $this->_leaseStatus     = $this->_leaseStatus;
+        $this->_sequenceNumber  = $this->_sequenceNumber;
     }
 
     /**
@@ -204,7 +228,7 @@ class BlobProperties
     {
         $this->_etag = $etag;
     }
-    
+
     /**
      * Gets blob contentType.
      *
@@ -226,7 +250,7 @@ class BlobProperties
     {
         $this->_contentType = $contentType;
     }
-    
+
     /**
      * Gets blob contentRange.
      *
@@ -248,7 +272,7 @@ class BlobProperties
     {
         $this->_contentRange = $contentRange;
     }
-    
+
     /**
      * Gets blob contentLength.
      *
@@ -271,7 +295,7 @@ class BlobProperties
         Validate::isInteger($contentLength, 'contentLength');
         $this->_contentLength = $contentLength;
     }
-    
+
     /**
      * Gets blob contentEncoding.
      *
@@ -293,7 +317,7 @@ class BlobProperties
     {
         $this->_contentEncoding = $contentEncoding;
     }
-    
+
     /**
      * Gets blob contentLanguage.
      *
@@ -315,7 +339,7 @@ class BlobProperties
     {
         $this->_contentLanguage = $contentLanguage;
     }
-    
+
     /**
      * Gets blob contentMD5.
      *
@@ -337,7 +361,7 @@ class BlobProperties
     {
         $this->_contentMD5 = $contentMD5;
     }
-    
+
     /**
      * Gets blob cacheControl.
      *
@@ -359,7 +383,7 @@ class BlobProperties
     {
         $this->_cacheControl = $cacheControl;
     }
-    
+
     /**
      * Gets blob blobType.
      *
@@ -381,7 +405,7 @@ class BlobProperties
     {
         $this->_blobType = $blobType;
     }
-    
+
     /**
      * Gets blob leaseStatus.
      *
@@ -403,7 +427,7 @@ class BlobProperties
     {
         $this->_leaseStatus = $leaseStatus;
     }
-    
+
     /**
      * Gets blob sequenceNumber.
      *
