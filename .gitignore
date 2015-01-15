@@ -1,29 +1,54 @@
-# IDE & System Related Files #
+# OSX
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+ 
+# Windows
+Thumbs.db
+Desktop.ini
+ 
+# PHPStorm
+.idea/
+
+# Sublime Text
+*.sublime*
+sftp-config.json
+ 
+# Eclipse
 .buildpath
 .project
 .settings
-.DS_Store
-.idea
-
-# Local System Files (i.e. cache, logs, etc.) #
-/administrator/cache
-/cache
-/logs
-/tmp
-/configuration.php
-/.htaccess
-/web.config
-
-# Test Related Files #
-/phpunit.xml
-/tests/system/webdriver/tests/logs/
+ 
+# Netbeans (custom)
+.netbeans/*
+/nbproject/*
+ 
+# Temp files
+*.tmp
+*.bak
+*.swp
+*~.nib
+*~
+ 
+# Phing build script
+build.properties
+ 
+# Packages #
+*.zip
+*.tar.*
+ 
+# Composer
+composer.lock
+/vendor
+ 
+# Test related files
 /tests/system/servers/configdef.php
-
-# phpDocumentor Logs #
-phpdoc-*
-
-# Patch Tester
-administrator/components/com_patchtester/
-administrator/templates/hathor/html/com_patchtester
-components/com_patchtester/
-
+/tests/system/webdriver/tests/logs/
+/tests/acceptance.suite.yml
+codecept.phar
+ 
+# Never ignore
+!.gitignore
+!index.html
+!index.php 
